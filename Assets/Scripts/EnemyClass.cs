@@ -28,6 +28,8 @@ public class Enemy : MonoBehaviour
 
     public float knockback; 
 
+    public int Speed;
+
     [SerializeField] private ParticleSystem bloodSpray;
     [SerializeField] private GameObject bloodDrop;
 
