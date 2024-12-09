@@ -11,9 +11,9 @@ public class ItemClass : ScriptableObject
     public bool isStackable = true;
     public bool isDroppable;
     public GameObject itemObject;
-    public AudioClip equipSound;
+    public float equipSpeed;
 
-    public virtual void Use(PlayerScript caller)
+    public virtual void Use(PlayerScript caller) // rename method
     {
         Debug.Log("used item");
     }
