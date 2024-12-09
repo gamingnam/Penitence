@@ -4,8 +4,19 @@ using UnityEngine;
 
 public class ChaseState : State
 {
+    public State next;
+
+    public bool nextActive;
+
     public override State RunCurrentState()
     {
-        return this;
+        if(nextActive)
+        {
+            return next;
+        }
+        else
+        {
+            return this;
+        }
     }
 }
