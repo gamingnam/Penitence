@@ -5,7 +5,6 @@ using UnityEngine;
 public class ChaseState : State
 {
     public State next;
-
     public bool nextActive;
 
     public override State RunCurrentState()
@@ -16,7 +15,7 @@ public class ChaseState : State
         }
         else
         {
-            return this;
+            return this; 
         }
     }
 }
