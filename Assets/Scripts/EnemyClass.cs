@@ -9,6 +9,7 @@ public enum EnemyType
     Type2,
     Type3
 }
+
 public class Enemy : MonoBehaviour
 {
 
@@ -16,9 +17,11 @@ public class Enemy : MonoBehaviour
 
     public int EnemyDmg;
 
-    public int Speed;
-
     public int _currentHealth;
+
+    public float knockback; 
+
+    public int Speed;
 
     [SerializeField] private ParticleSystem bloodSpray;
     [SerializeField] private GameObject bloodDrop;
