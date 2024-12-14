@@ -2,18 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class IdleState : State, IEnemy
+public class IdleState : State
 {
     public State chaseState;
     public State poopstate;
     public bool canSeePlayer;
 
-    enum skibidiEnum
+    public enum baseStates
     {
         chase,
         wonder,
         stalk
     }
+
+    public baseStates baseState;
 
     public override State RunCurrentState()
     {
@@ -26,13 +28,14 @@ public class IdleState : State, IEnemy
             return this;
         }
 
-        switch (skibidiEnum)
+        switch (baseState)
         {
-            case skibidiEnum.chase:
+            case baseStates.chase:
                 return chaseState;
-            case skibidiEnum.wonder:
-                return poopstate;
-            break;
+            case baseStates.wonder:
+                //return another state or somthing
+            default:
+                return this;
 
         }
     }
