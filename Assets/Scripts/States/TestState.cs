@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TestState : State
+public class TestState : State, IEnemy
 {
 
     public override State RunCurrentState()

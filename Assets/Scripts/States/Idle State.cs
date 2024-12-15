@@ -4,8 +4,18 @@ using UnityEngine;
 
 public class IdleState : State
 {
-    public ChaseState chaseState;
+    public State chaseState;
+    public State poopstate;
     public bool canSeePlayer;
+
+    public enum baseStates
+    {
+        chase,
+        wonder,
+        stalk
+    }
+
+    public baseStates baseState;
 
     public override State RunCurrentState()
     {
@@ -16,6 +26,17 @@ public class IdleState : State
         else
         {
             return this;
+        }
+
+        switch (baseState)
+        {
+            case baseStates.chase:
+                return chaseState;
+            case baseStates.wonder:
+                //return another state or somthing
+            default:
+                return this;
+
         }
     }
 }
