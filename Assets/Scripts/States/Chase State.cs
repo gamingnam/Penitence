@@ -17,5 +17,6 @@ public class ChaseState : State
         {
             return this; 
         }
+        Debug.Log("Chase State");
     }
 }
