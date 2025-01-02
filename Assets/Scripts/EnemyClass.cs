@@ -10,7 +10,7 @@ public enum EnemyType
     Type3
 }
 
-public class Enemy : MonoBehaviour
+public class Enemy : MonoBehaviour,IDamageable
 {
 
     public int MaxHp;

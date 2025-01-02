@@ -1,39 +1,37 @@
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class IdleState : State, IEnemy
+public class IdleState : State
 {
     public State chaseState;
-    public State poopstate;
-    public bool canSeePlayer;
+    public State poopState;
 
-    enum skibidiEnum
+    public enum baseStates
     {
+        Idle,
         chase,
         wonder,
         stalk
     }
 
+    public baseStates baseState;
+
     public override State RunCurrentState()
     {
-        if (canSeePlayer)
+        switch (baseState)
         {
-            return chaseState;
-        }
-        else
-        {
-            return this;
-        }
-
-        switch (skibidiEnum)
-        {
-            case skibidiEnum.chase:
+            case baseStates.chase:
                 return chaseState;
-            case skibidiEnum.wonder:
-                return poopstate;
-            break;
+            case baseStates.wonder:
+                return poopState;
+            default:
+                return this;
 
         }
+       
+
     }
 }
