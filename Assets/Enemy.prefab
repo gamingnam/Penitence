@@ -45,10 +45,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   next: {fileID: 12903695170078101}
-  nextActive: 0
   playerTransform: {fileID: 0}
   rb: {fileID: 13860487768714972}
-  speed: 300
+  speed: 15
   wait: 0
 --- !u!1 &6523876783623415289
 GameObject:
@@ -266,7 +265,7 @@ MonoBehaviour:
   - {x: 0.0024167895, y: -0.4863662, z: 0}
   m_ShapePathHash: 2108936961
   m_Mesh: {fileID: 0}
-  m_InstanceId: -1346
+  m_InstanceId: -1726
   m_LocalBounds:
     m_Center: {x: 0.0039272606, y: 0.0015105307, z: 0}
     m_Extent: {x: 0.48485586, y: 0.48787674, z: 0}
