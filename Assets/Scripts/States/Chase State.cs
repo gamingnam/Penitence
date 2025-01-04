@@ -7,16 +7,24 @@ using UnityEngine;
 public class ChaseState : State
 {
     //TODO: How do you make Update Active only when this script is returned?
-    public State next;
-    public bool nextActive;
+    public State IdleState;
     [SerializeField] private Transform playerTransform;
-    private Vector2 lastPosition;
     [SerializeField] private Rigidbody2D rb;
+    private Vector2 lastPosition;
     private Vector2 direction;
     public float speed;
     public float wait;
 
+    public enum EnemyBehavior
+    {
+        WeChilling, // will be the default enum so we don't start at any of the other states by default
+        SightLost, //if the enemy lost sight of the player
+        Charge, //for the touch enemy: Should charge towards the player at full force, giving them damage (knockback maybe?)
+        EmitSmell, //for smell enemy starts emitting the fumes and the player starts to love health
+        StartSound, //for the sound enemy, will start emitting damanging sound if player is with range.
+    }
 
+    public EnemyBehavior attackType;
 
     public override State RunCurrentState()
     {
@@ -24,7 +32,17 @@ public class ChaseState : State
         Debug.Log("Chase Activated");
         Movement();
         StartCoroutine(FindLastPosition(wait));
-        return this;
+
+        switch(attackType)
+        {
+            default:
+                return this;
+            case EnemyBehavior.SightLost:
+                Debug.Log("Sight Lost");
+                return IdleState;
+            
+        }
+        //return this;
         
     }
 
