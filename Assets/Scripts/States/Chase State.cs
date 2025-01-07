@@ -50,7 +50,6 @@ public class ChaseState : State
     {
         playerTransform = GameObject.Find("Player").transform;
         wait = 1f;
-        //IdleState = 
         
     }
     public void Movement()
