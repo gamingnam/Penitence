@@ -4,10 +4,10 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
-public class PlayerScript : MonoBehaviour
+public class PlayerScript : MonoBehaviour,IDamageable
 {
     public int ammo;
-    private float health;
+    [SerializeField] private float health;
 
     [SerializeField] public InventoryManager inventory;
 
@@ -40,6 +40,11 @@ public class PlayerScript : MonoBehaviour
     private SpriteRenderer sr;
 
     public Transform muzzle;
+
+    [SerializeField] private GameObject spawner;
+    [SerializeField] private LayerMask spawnerMask;
+    [SerializeField] private int spawnerRadius;
+    
     public UnityEngine.Rendering.Universal.Light2D muzzleflash;
 
     // Start is called before the first frame update
@@ -67,6 +72,7 @@ public class PlayerScript : MonoBehaviour
 
         ShootHandler();
         InventoryHandler();
+        RespawnParse();
     }
     private void LateUpdate()
     {
@@ -146,5 +152,35 @@ public class PlayerScript : MonoBehaviour
             if (inventory.selectedItem != null)
                 inventory.selectedItem.Use(this);
         }
+    }
+
+    void RespawnParse()
+    {
+        Collider2D[] circleCols = Physics2D.OverlapCircleAll(this.transform.position, spawnerRadius, spawnerMask);
+		for (int i = 0; i < circleCols.Length; i++)
+		{
+            Collider2D circleCol = circleCols[i];
+			if (circleCol == spawner || circleCol == null)
+			{
+                continue; 
+			}
+
+            spawner = circleCol.gameObject;
+            break;
+		}
+    }
+
+   public void UpdateHealth(int newHealthValue)
+   {
+
+   }
+   public void ReceiveDamage(int damage)
+   {
+
+   }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(this.transform.position, spawnerRadius);
     }
 }
