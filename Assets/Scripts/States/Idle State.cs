@@ -14,7 +14,8 @@ public class IdleState : State
         Idle,
         chase,
         wonder,
-        stalk
+        stalk,
+        eat
     }
 
     public baseStates baseState;
@@ -31,7 +32,5 @@ public class IdleState : State
                 return this;
 
         }
-       
-
     }
 }
