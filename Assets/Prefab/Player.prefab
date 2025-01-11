@@ -320,6 +320,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ammo: 0
+  health: 100
   inventory: {fileID: 0}
   speed: 250
   firePoint: {fileID: 19577958439261943}
@@ -330,17 +331,17 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 2
-      outSlope: 2
+      inSlope: 0
+      outSlope: 0
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
       time: 1
-      value: 0.008010864
-      inSlope: 0
-      outSlope: 0
+      value: 1
+      inSlope: 2
+      outSlope: 2
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -356,7 +357,12 @@ MonoBehaviour:
   normalJohn: {fileID: 21300000, guid: 509c8d90d7e088b48921f5ba986d46a6, type: 3}
   hasGun: {fileID: 21300000, guid: 4c59551d0c376714c9b1ca0d3d940c52, type: 3}
   muzzle: {fileID: 9174900055166283598}
-  muzzleflash: {fileID: 0}
+  spawner: {fileID: 0}
+  spawnerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  spawnerRadius: 2
+  muzzleflash: {fileID: 5094108714208807529}
 --- !u!50 &8560729919795105479
 Rigidbody2D:
   serializedVersion: 4
@@ -578,7 +584,7 @@ MonoBehaviour:
   - {x: 0.47844204, y: -0.22929345, z: 0}
   m_ShapePathHash: -1973668868
   m_Mesh: {fileID: 0}
-  m_InstanceId: 62734
+  m_InstanceId: -1680
   m_LocalBounds:
     m_Center: {x: -0.069806814, y: -0.06000194, z: 0}
     m_Extent: {x: 0.567334, y: 0.39176702, z: 0}
