@@ -44,12 +44,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ccea725a83174d7bab487cf397e51e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IdleState: {fileID: 0}
   playerTransform: {fileID: 0}
+  enemyTransform: {fileID: 7978462366978381558}
   rb: {fileID: 13860487768714972}
-  speed: 15
-  wait: 0
-  attackType: 0
+  seekWeight: 1.5
+  avoidWeight: 1
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  playerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  obstacleDetectionRadius: 1.5
+  playerRadius: 5
+  distanceClamp: 10
+  duration: 3
+  speed: 4
+  idleState: {fileID: 6426981777783663359}
+  attackState: {fileID: 12903695170078101}
 --- !u!1 &6523876783623415289
 GameObject:
   m_ObjectHideFlags: 0
@@ -167,7 +179,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!58 &356913259935933289
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -266,7 +278,7 @@ MonoBehaviour:
   - {x: 0.0024167895, y: -0.4863662, z: 0}
   m_ShapePathHash: 2108936961
   m_Mesh: {fileID: 0}
-  m_InstanceId: -1718
+  m_InstanceId: -1590
   m_LocalBounds:
     m_Center: {x: 0.0039272606, y: 0.0015105307, z: 0}
     m_Extent: {x: 0.48485586, y: 0.48787674, z: 0}
@@ -412,6 +424,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   chaseState: {fileID: 6192922603778688717}
   poopState: {fileID: 12903695170078101}
+  enemyTransform: {fileID: 7978462366978381558}
+  playerRadius: 5
+  playerMask:
+    serializedVersion: 2
+    m_Bits: 128
   baseState: 0
 --- !u!1 &8328395096263190121
 GameObject:

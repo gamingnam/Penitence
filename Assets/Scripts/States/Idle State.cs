@@ -9,6 +9,10 @@ public class IdleState : State
     public State chaseState;
     public State poopState;
 
+    [SerializeField] private Transform enemyTransform;
+    [SerializeField] private float playerRadius;   
+    [SerializeField] private LayerMask playerMask;
+
     public enum baseStates
     {
         Idle,
@@ -21,6 +25,11 @@ public class IdleState : State
 
     public override State RunCurrentState()
     {
+
+        if (isPlayerNear())
+        {
+            baseState = baseStates.chase;
+        }
         switch (baseState)
         {
             case baseStates.chase:
@@ -31,7 +40,21 @@ public class IdleState : State
                 return this;
 
         }
+
        
 
     }
+
+    private bool isPlayerNear()
+    {
+        return Physics2D.OverlapCircle(enemyTransform.position, playerRadius, playerMask);
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(enemyTransform.position, playerRadius);
+    }
+
+
 }
