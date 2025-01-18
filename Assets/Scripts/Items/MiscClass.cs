@@ -6,9 +6,6 @@ using UnityEngine;
 public class MiscClass : ItemClass
 {
     //data for misc
-    public override void Use(PlayerScript caller)
-    {
-        //base.Use(caller);
-    }
+    public override void Use(PlayerScript caller) { }
     public override MiscClass GetMisc() { return this; }
 }
