@@ -55,13 +55,18 @@ MonoBehaviour:
   playerMask:
     serializedVersion: 2
     m_Bits: 128
-  obstacleDetectionRadius: 1.5
-  playerRadius: 5
+  obstacleDetectionRadius: 1.25
+  playerRadius: 3
   distanceClamp: 10
   duration: 3
   speed: 4
   idleState: {fileID: 6426981777783663359}
   attackState: {fileID: 12903695170078101}
+  lastKnownPosition: {x: 0, y: 0}
+  dropletCounter: 0
+  maxDroplets: 3
+  isFollowingDroplets: 0
+  stopChasePlayer: 0
 --- !u!1 &6523876783623415289
 GameObject:
   m_ObjectHideFlags: 0
@@ -278,7 +283,7 @@ MonoBehaviour:
   - {x: 0.0024167895, y: -0.4863662, z: 0}
   m_ShapePathHash: 2108936961
   m_Mesh: {fileID: 0}
-  m_InstanceId: -1590
+  m_InstanceId: -116778
   m_LocalBounds:
     m_Center: {x: 0.0039272606, y: 0.0015105307, z: 0}
     m_Extent: {x: 0.48485586, y: 0.48787674, z: 0}
@@ -425,11 +430,11 @@ MonoBehaviour:
   chaseState: {fileID: 6192922603778688717}
   poopState: {fileID: 12903695170078101}
   enemyTransform: {fileID: 7978462366978381558}
-  playerRadius: 5
+  playerRadius: 3
   playerMask:
     serializedVersion: 2
     m_Bits: 128
-  baseState: 0
+  showGizmos: 1
 --- !u!1 &8328395096263190121
 GameObject:
   m_ObjectHideFlags: 0

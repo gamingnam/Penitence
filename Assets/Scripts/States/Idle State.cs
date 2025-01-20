@@ -12,37 +12,23 @@ public class IdleState : State
     [SerializeField] private Transform enemyTransform;
     [SerializeField] private float playerRadius;   
     [SerializeField] private LayerMask playerMask;
-
-    public enum baseStates
-    {
-        Idle,
-        chase,
-        wonder,
-        stalk
-    }
-
-    public baseStates baseState;
+    public bool showGizmos;
 
     public override State RunCurrentState()
     {
 
+        Debug.Log(isPlayerNear());
         if (isPlayerNear())
         {
-            baseState = baseStates.chase;
+            showGizmos = false;
+            return chaseState;
+            
         }
-        switch (baseState)
+        else
         {
-            case baseStates.chase:
-                return chaseState;
-            case baseStates.wonder:
-                return poopState;
-            default:
-                return this;
-
+            showGizmos = true;
         }
-
-       
-
+        return this;
     }
 
     private bool isPlayerNear()
@@ -51,9 +37,12 @@ public class IdleState : State
     }
 
     private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(enemyTransform.position, playerRadius);
+    {   
+        if(showGizmos)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(enemyTransform.position, playerRadius);
+        }
     }
 
 

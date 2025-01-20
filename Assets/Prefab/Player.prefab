@@ -230,7 +230,7 @@ GameObject:
   - component: {fileID: 8177354620791746669}
   - component: {fileID: 7498795970009110723}
   - component: {fileID: 8950719905531816999}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -322,7 +322,7 @@ MonoBehaviour:
   ammo: 0
   health: 100
   inventory: {fileID: 0}
-  speed: 250
+  speed: 300
   firePoint: {fileID: 19577958439261943}
   smooth: 0.5
   curve:
@@ -584,7 +584,7 @@ MonoBehaviour:
   - {x: 0.47844204, y: -0.22929345, z: 0}
   m_ShapePathHash: -1973668868
   m_Mesh: {fileID: 0}
-  m_InstanceId: -1680
+  m_InstanceId: -116738
   m_LocalBounds:
     m_Center: {x: -0.069806814, y: -0.06000194, z: 0}
     m_Extent: {x: 0.567334, y: 0.39176702, z: 0}
