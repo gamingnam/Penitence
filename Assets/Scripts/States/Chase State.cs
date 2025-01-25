@@ -52,9 +52,8 @@ public class ChaseState : State
     [SerializeField] private Vector2 lastKnownPosition;
     [SerializeField] private int dropletCounter;
     [SerializeField] private int maxDroplets;
-    [SerializeField] private bool isFollowingDroplets; 
+    [SerializeField] private bool isFollowingDroplets;
     [SerializeField] private float dropletDiscard;
-    [SerializeField] private float unitCircleMultiplier;
     private Queue<Vector2> droplets = new Queue<Vector2>();
     #endregion
 
@@ -122,7 +121,6 @@ public class ChaseState : State
         {
             droplets.Enqueue(position);
             dropletCounter = 1;
-
         }
         
         while (true)
@@ -132,10 +130,7 @@ public class ChaseState : State
             if(droplets.Count >= 0)
             {
                 lastKnownPosition = droplets.Peek();
-                if (Vector2.Distance(rb.position, lastKnownPosition) < dropletDiscard)
-                {
-                    droplets.Dequeue(); // Remove the droplet once reached
-                }
+
             }
 
            // If we've exceeded the max number of droplets or no droplets remain
@@ -147,13 +142,16 @@ public class ChaseState : State
                 yield break; // Exit the coroutine
             }
 
-
+            //Change it to be one at a time 
             Vector2 newDropletPosition = CalculateNextDropPos();
-            if (droplets.Count == 0 || Vector2.Distance(newDropletPosition, lastKnownPosition) > 1.0f)
+            if (droplets.Count == 0 || Vector2.Distance(newDropletPosition, lastKnownPosition) > obstacleDetectionRadius || rb.position == droplets.Peek()) 
             {
-                droplets.Enqueue(newDropletPosition);
+                droplets.Dequeue();
                 dropletCounter++;
+                droplets.Enqueue(newDropletPosition);
             }
+
+           
         }
     }
     
@@ -165,8 +163,22 @@ public class ChaseState : State
     #endregion
     private Vector2 CalculateNextDropPos()
     {
-        return rb.position + Random.insideUnitCircle * unitCircleMultiplier;
+        // Direction vector towards the player
+        Vector2 directionToPlayer = ((Vector2)playerTransform.position - rb.position).normalized;
+
+        // New position in the direction of the player within the detection radius
+        Vector2 proposedPosition = rb.position + directionToPlayer * playerRadius;
+
+        // Clamp the position within the detection radius
+        if (Vector2.Distance(rb.position, proposedPosition) > playerRadius)
+        {
+            proposedPosition = rb.position + directionToPlayer * playerRadius;
+        }
+
+        return proposedPosition;
     }
+
+
 
     #region
     /// <summary>
