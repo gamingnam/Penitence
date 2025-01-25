@@ -7,6 +7,7 @@ public class ChaseState : State
     /*TODO:
       Find a way to make it go one droplet at a time
      */
+    //THE Y SCALE FOR THE WALL CANNOT BE SMALLER THAN 10
 
     #region General
     [Header("General")]
@@ -202,7 +203,9 @@ public class ChaseState : State
     private Vector2 CalculateSteeringForce(Vector2 targetPosition)
     {
         Vector2 seekForce = Seek(targetPosition) * seekWeight;
-        Vector2 avoidForce = AvoidObstacles() * avoidWeight;
+        Vector2 avoidForce = (AvoidObstacles() * avoidWeight) * 85;
+
+        Debug.Log("The avoidence force is" + avoidForce);
 
         return seekForce + avoidForce;
     }
@@ -217,20 +220,39 @@ public class ChaseState : State
     {
         Collider2D[] obstacles = Physics2D.OverlapCircleAll(rb.position, obstacleDetectionRadius, obstacleLayer);
 
-        Vector2 avoidanceForce = Vector2.zero;
+        Vector2 totalAvoidanceForce = Vector2.zero;
+        int count = 0;
+
         foreach (var obstacle in obstacles)
         {
             Vector2 directionAway = (rb.position - (Vector2)obstacle.transform.position).normalized;
-            avoidanceForce += directionAway / Vector2.Distance(rb.position, obstacle.transform.position);
+            float distance = Vector2.Distance(rb.position, obstacle.transform.position);
+
+            // Stronger avoidance for closer obstacles, weaker for farther ones
+            totalAvoidanceForce += directionAway / Mathf.Max(distance, 0.1f); // Avoid division by zero
+            count++;
         }
 
-        return avoidanceForce.normalized * speed;
+        if (count > 0)
+        {
+            totalAvoidanceForce /= count; // Average the avoidance force
+        }
+
+        // Limit the maximum strength of the avoidance force
+        totalAvoidanceForce = totalAvoidanceForce.normalized * Mathf.Min(totalAvoidanceForce.magnitude, speed * 1.5f);
+
+        return totalAvoidanceForce;
     }
 
     private void ApplySteering(Vector2 force)
     {
-        rb.velocity = Vector2.ClampMagnitude(rb.velocity + force * Time.deltaTime, speed);
+        // Smoothly apply steering force to the velocity
+        Vector2 desiredVelocity = rb.velocity + force * Time.deltaTime;
+
+        // Gradually clamp the velocity to avoid abrupt changes
+        rb.velocity = Vector2.Lerp(rb.velocity, Vector2.ClampMagnitude(desiredVelocity, speed), 0.5f);
     }
+
 
     #region 
     /// <summary>
