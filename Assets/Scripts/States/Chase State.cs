@@ -5,10 +5,7 @@ using UnityEngine;
 public class ChaseState : State
 {
     /*TODO:
-     FIX THE DROPLET SYSTEM WITH THIS: 
-     * When the player exists the enemy's radius the player drop an invisble gameobject by the name of droplet. 
-     * Afterwards, the enemy will move towards the droplet and see if the player exists at it. 
-     * After doing this 2-3 times (AKA spawning 2-3 droplets) the enemy will give up and enter the wander state. 
+      Find a way to make it go one droplet at a time
      */
 
     #region General
@@ -21,6 +18,8 @@ public class ChaseState : State
     [SerializeField] private Transform playerTransform;
     [SerializeField] private Transform enemyTransform;
     [SerializeField] private Rigidbody2D rb;
+    [SerializeField] private Animator chaseAnimator;
+    [SerializeField] private Animation chaseAnimation;
     #endregion
 
     #region Steering Weights
@@ -34,7 +33,8 @@ public class ChaseState : State
     [SerializeField] private LayerMask obstacleLayer;
     [SerializeField] private LayerMask playerMask;
     [SerializeField] private float obstacleDetectionRadius = 3f;
-    [SerializeField] private float playerRadius = 5f;
+    [SerializeField] private float playerRadius;
+    private float attackRadius;
     [SerializeField] private float distanceClamp;
     [SerializeField] private float duration;
     public float speed = 5f;
@@ -53,26 +53,37 @@ public class ChaseState : State
     [SerializeField] private int dropletCounter;
     [SerializeField] private int maxDroplets;
     [SerializeField] private bool isFollowingDroplets; 
+    [SerializeField] private float dropletDiscard;
+    [SerializeField] private float unitCircleMultiplier;
     private Queue<Vector2> droplets = new Queue<Vector2>();
     #endregion
 
     public void Start()
     {
         playerTransform = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
+        attackRadius = playerRadius/1.5f;
     }
 
+    #region 
+    /// <summary>
+    /// A function used to run whatever behavior the state is executing 
+    /// (basically acts as our void Update in our individual states)
+    /// </summary>
+    /// <returns>the state we're currently in or another state</returns>
+    #endregion 
     public override State RunCurrentState()
     {
         Debug.Log("Chase state is activated");
         if (playerTransform == null)
         {
-            Debug.LogWarning("Player not assigned, transitioning to IdleState.");
+            Debug.LogError("Player not assigned, transitioning to IdleState.");
             return idleState;
         }
-
+        
         if (isPlayerNear())
         {
             lastKnownPosition = playerTransform.position;
+            dropletCounter = 0;
 
         }
         else if(!isFollowingDroplets && !isPlayerNear())
@@ -83,6 +94,7 @@ public class ChaseState : State
 
         if(dropletCounter > maxDroplets)
         {
+            Reset();
             return idleState;
         }
 
@@ -106,9 +118,13 @@ public class ChaseState : State
 
     public IEnumerator FollowDroplet(Vector2 position, float duration)
     {
-        droplets.Enqueue(position);
-        dropletCounter++;
+        if(droplets.Count == 0)
+        {
+            droplets.Enqueue(position);
+            dropletCounter = 1;
 
+        }
+        
         while (true)
         {
 
@@ -116,7 +132,7 @@ public class ChaseState : State
             if(droplets.Count >= 0)
             {
                 lastKnownPosition = droplets.Peek();
-                if (Vector2.Distance(rb.position, lastKnownPosition) < 0.5f)
+                if (Vector2.Distance(rb.position, lastKnownPosition) < dropletDiscard)
                 {
                     droplets.Dequeue(); // Remove the droplet once reached
                 }
@@ -130,7 +146,26 @@ public class ChaseState : State
                 isFollowingDroplets = false;
                 yield break; // Exit the coroutine
             }
+
+
+            Vector2 newDropletPosition = CalculateNextDropPos();
+            if (droplets.Count == 0 || Vector2.Distance(newDropletPosition, lastKnownPosition) > 1.0f)
+            {
+                droplets.Enqueue(newDropletPosition);
+                dropletCounter++;
+            }
         }
+    }
+    
+    #region 
+    /// <summary>
+    /// Guesses where the player is by adding the player's position by random point inside a unit circle multiplied by a float value
+    /// </summary>
+    /// <returns> The sum of the player position and the multiplied unit circle value </returns>
+    #endregion
+    private Vector2 CalculateNextDropPos()
+    {
+        return rb.position + Random.insideUnitCircle * unitCircleMultiplier;
     }
 
     #region
@@ -186,9 +221,28 @@ public class ChaseState : State
         rb.velocity = Vector2.ClampMagnitude(rb.velocity + force * Time.deltaTime, speed);
     }
 
+    #region 
+    /// <summary>
+    /// Resets Everything in the ChaseState
+    /// </summary>
+    #endregion
+    private void Reset() 
+    {
+        rb.velocity = Vector2.zero;
+        StopAllCoroutines();
+        droplets.Clear();
+        isFollowingDroplets = false;
+        dropletCounter = 0;
+    }
+
     private bool isPlayerNear()
     {
         return Physics2D.OverlapCircle(enemyTransform.position, playerRadius, playerMask);
+    }
+
+    private bool isPlayerInAttackRange()
+    {
+        return Physics2D.OverlapCircle(enemyTransform.position, attackRadius, playerMask);
     }
 
     private void OnDrawGizmos()
@@ -201,13 +255,16 @@ public class ChaseState : State
             Gizmos.color = Color.blue;
             Gizmos.DrawWireSphere(enemyTransform.position, playerRadius);
 
+            Gizmos.color = Color.white;
+            Gizmos.DrawWireSphere(enemyTransform.position, attackRadius);
+
             Gizmos.color = Color.green;
             if (playerTransform != null)
             {
                 Gizmos.DrawLine(rb.position, playerTransform.position);
             }
 
-            Gizmos.color = Color.yellow;
+            Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(lastKnownPosition, 0.2f);
 
             foreach (var droplet in droplets)

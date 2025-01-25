@@ -44,9 +44,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ccea725a83174d7bab487cf397e51e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showGizmos: 1
   playerTransform: {fileID: 0}
   enemyTransform: {fileID: 7978462366978381558}
   rb: {fileID: 13860487768714972}
+  chaseAnimator: {fileID: 0}
+  chaseAnimation: {fileID: 0}
   seekWeight: 1.5
   avoidWeight: 1
   obstacleLayer:
@@ -56,9 +59,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   obstacleDetectionRadius: 1.25
-  playerRadius: 3
-  distanceClamp: 10
-  duration: 3
+  playerRadius: 4
+  distanceClamp: 20
+  duration: 1
   speed: 4
   idleState: {fileID: 6426981777783663359}
   attackState: {fileID: 12903695170078101}
@@ -66,7 +69,6 @@ MonoBehaviour:
   dropletCounter: 0
   maxDroplets: 3
   isFollowingDroplets: 0
-  stopChasePlayer: 0
 --- !u!1 &6523876783623415289
 GameObject:
   m_ObjectHideFlags: 0
@@ -236,7 +238,6 @@ MonoBehaviour:
   EnemyDmg: 10
   _currentHealth: 0
   knockback: 0
-  Speed: 10
   bloodSpray: {fileID: 6122068742976237884, guid: f7ed74695a60d4d4b83e7fb95475d27a, type: 3}
   bloodDrop: {fileID: 2883353509993904058, guid: 3567e8daf5a60d144a0b5542f8febb85, type: 3}
   hurtSound: {fileID: 8300000, guid: 06432f86751720e45b1242f3fb0ec432, type: 3}
@@ -283,7 +284,7 @@ MonoBehaviour:
   - {x: 0.0024167895, y: -0.4863662, z: 0}
   m_ShapePathHash: 2108936961
   m_Mesh: {fileID: 0}
-  m_InstanceId: -116778
+  m_InstanceId: -1622
   m_LocalBounds:
     m_Center: {x: 0.0039272606, y: 0.0015105307, z: 0}
     m_Extent: {x: 0.48485586, y: 0.48787674, z: 0}
@@ -427,14 +428,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f1c195ae44674c67abd76565f40fe59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  showGizmos: 1
   chaseState: {fileID: 6192922603778688717}
-  poopState: {fileID: 12903695170078101}
+  attackState: {fileID: 12903695170078101}
+  enemy: {fileID: 6523876783623415289}
   enemyTransform: {fileID: 7978462366978381558}
-  playerRadius: 3
+  playerRadius: 4
   playerMask:
     serializedVersion: 2
     m_Bits: 128
-  showGizmos: 1
 --- !u!1 &8328395096263190121
 GameObject:
   m_ObjectHideFlags: 0

@@ -6,23 +6,40 @@ using UnityEngine;
 
 public class IdleState : State
 {
-    public State chaseState;
-    public State poopState;
 
+    #region General
+    [Header("General")]
+    public bool showGizmos;
+    #endregion
+
+    #region States to transition to
+    [Header("States to transition to")]
+    public State chaseState;
+    public State attackState;
+    #endregion
+
+    #region Tracking the Player
+    [Header("Tracking the Player")]
+    [SerializeField] private GameObject enemy;
     [SerializeField] private Transform enemyTransform;
     [SerializeField] private float playerRadius;   
     [SerializeField] private LayerMask playerMask;
-    public bool showGizmos;
+    #endregion
+    
 
     public override State RunCurrentState()
     {
-
-        Debug.Log(isPlayerNear());
         if (isPlayerNear())
         {
             showGizmos = false;
-            return chaseState;
-            
+            if(enemy.gameObject.tag == "StaticEnemy")
+            {
+                return attackState;
+            }
+            else
+            {
+                return chaseState; 
+            }
         }
         else
         {
