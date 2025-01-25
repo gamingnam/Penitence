@@ -144,14 +144,14 @@ public class ChaseState : State
 
             //Change it to be one at a time 
             Vector2 newDropletPosition = CalculateNextDropPos();
+            bool isWithinObstacleDetectionRadius = Physics2D.OverlapCircle(newDropletPosition, obstacleDetectionRadius, obstacleLayer);
+
             if (droplets.Count == 0 || Vector2.Distance(newDropletPosition, lastKnownPosition) > obstacleDetectionRadius || rb.position == droplets.Peek()) 
             {
                 droplets.Dequeue();
                 dropletCounter++;
                 droplets.Enqueue(newDropletPosition);
             }
-
-           
         }
     }
     
