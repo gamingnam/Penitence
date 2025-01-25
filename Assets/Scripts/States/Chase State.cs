@@ -10,7 +10,7 @@ public class ChaseState : State
 
     #region General
     [Header("General")]
-    [SerializeField] private bool showGizmos = true; 
+    [SerializeField] private bool showGizmos = true;
     #endregion
 
     #region References
@@ -46,7 +46,6 @@ public class ChaseState : State
     [SerializeField] private State attackState;
     #endregion
 
-
     #region Tracking the Player
     [Header("Tracking the Player")]
     [SerializeField] private Vector2 lastKnownPosition;
@@ -54,13 +53,13 @@ public class ChaseState : State
     [SerializeField] private int maxDroplets;
     [SerializeField] private bool isFollowingDroplets;
     [SerializeField] private float dropletDiscard;
-    private Queue<Vector2> droplets = new Queue<Vector2>();
+    private Queue<GameObject> droplets = new Queue<GameObject>(); // Queue of GameObjects (droplets)
     #endregion
 
     public void Start()
     {
         playerTransform = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
-        attackRadius = playerRadius/1.5f;
+        attackRadius = playerRadius / 1.5f;
     }
 
     #region 
@@ -78,20 +77,19 @@ public class ChaseState : State
             Debug.LogError("Player not assigned, transitioning to IdleState.");
             return idleState;
         }
-        
+
         if (isPlayerNear())
         {
             lastKnownPosition = playerTransform.position;
             dropletCounter = 0;
-
         }
-        else if(!isFollowingDroplets && !isPlayerNear())
+        else if (!isFollowingDroplets && !isPlayerNear())
         {
-            StartCoroutine(FollowDroplet(lastKnownPosition,duration));
+            StartCoroutine(FollowDroplet(lastKnownPosition, duration));
             isFollowingDroplets = true;
         }
 
-        if(dropletCounter > maxDroplets)
+        if (dropletCounter > maxDroplets)
         {
             Reset();
             return idleState;
@@ -101,39 +99,34 @@ public class ChaseState : State
         AdjustWeightsDynamically(Vector2.Distance(rb.position, lastKnownPosition));
 
         // Perform context-oriented steering to chase the player or move to the last known position
-        Vector2 targetPosition = isFollowingDroplets ? lastKnownPosition : playerTransform.position;
+        GameObject targetDroplet = droplets.Count > 0 ? droplets.Peek() : null;
+        Vector2 targetPosition = targetDroplet != null ? targetDroplet.transform.position : playerTransform.position;
         Vector2 steeringForce = CalculateSteeringForce(targetPosition);
         ApplySteering(steeringForce);
 
         Debug.Log("Chasing player or moving to last known position.");
 
-        foreach (var droplet in droplets)
-        {
-            Debug.Log(droplet);
-        }
-        
         return this; // Remain in ChaseState
     }
 
     public IEnumerator FollowDroplet(Vector2 position, float duration)
     {
-        if(droplets.Count == 0)
+        if (droplets.Count == 0)
         {
-            droplets.Enqueue(position);
+            droplets.Enqueue(InstantiateDroplet(position)); // Create the first droplet
             dropletCounter = 1;
         }
-        
+
         while (true)
         {
-
             yield return new WaitForSeconds(duration);
-            if(droplets.Count >= 0)
-            {
-                lastKnownPosition = droplets.Peek();
 
+            if (droplets.Count > 0)
+            {
+                lastKnownPosition = droplets.Peek().transform.position;
             }
 
-           // If we've exceeded the max number of droplets or no droplets remain
+            // If we've exceeded the max number of droplets or no droplets remain
             if (dropletCounter > maxDroplets || droplets.Count == 0)
             {
                 Debug.Log("Exceeded max droplets or no droplets remain. Transitioning to IdleState.");
@@ -142,19 +135,20 @@ public class ChaseState : State
                 yield break; // Exit the coroutine
             }
 
-            //Change it to be one at a time 
-            Vector2 newDropletPosition = CalculateNextDropPos();
-            bool isWithinObstacleDetectionRadius = Physics2D.OverlapCircle(newDropletPosition, obstacleDetectionRadius, obstacleLayer);
-
-            if (droplets.Count == 0 || Vector2.Distance(newDropletPosition, lastKnownPosition) > obstacleDetectionRadius || rb.position == droplets.Peek()) 
+            // Change it to be one droplet at a time
+            GameObject targetDroplet = droplets.Peek();
+            if (Vector2.Distance(targetDroplet.transform.position, rb.position) < dropletDiscard || rb.position == (Vector2)targetDroplet.transform.position)
             {
-                droplets.Dequeue();
+                droplets.Dequeue(); // Remove the droplet
                 dropletCounter++;
-                droplets.Enqueue(newDropletPosition);
+
+                // Create a new droplet and enqueue it
+                Vector2 newDropletPosition = CalculateNextDropPos();
+                droplets.Enqueue(InstantiateDroplet(newDropletPosition));
             }
         }
     }
-    
+
     #region 
     /// <summary>
     /// Guesses where the player is by adding the player's position by random point inside a unit circle multiplied by a float value
@@ -178,7 +172,12 @@ public class ChaseState : State
         return proposedPosition;
     }
 
-
+    private GameObject InstantiateDroplet(Vector2 position)
+    {
+        GameObject droplet = new GameObject("Droplet");
+        droplet.transform.position = position;
+        return droplet;
+    }
 
     #region
     /// <summary>
@@ -238,10 +237,14 @@ public class ChaseState : State
     /// Resets Everything in the ChaseState
     /// </summary>
     #endregion
-    private void Reset() 
+    private void Reset()
     {
         rb.velocity = Vector2.zero;
         StopAllCoroutines();
+        foreach (var droplet in droplets)
+        {
+            Destroy(droplet); // Destroy all droplets to avoid memory leak
+        }
         droplets.Clear();
         isFollowingDroplets = false;
         dropletCounter = 0;
@@ -259,7 +262,7 @@ public class ChaseState : State
 
     private void OnDrawGizmos()
     {
-        if(showGizmos)
+        if (showGizmos)
         {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(rb.position, obstacleDetectionRadius);
@@ -281,7 +284,7 @@ public class ChaseState : State
 
             foreach (var droplet in droplets)
             {
-                Gizmos.DrawWireSphere(droplet, 0.2f);
+                Gizmos.DrawWireSphere(droplet.transform.position, 0.2f);
             }
         }
     }

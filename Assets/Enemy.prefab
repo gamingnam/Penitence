@@ -58,17 +58,18 @@ MonoBehaviour:
   playerMask:
     serializedVersion: 2
     m_Bits: 128
-  obstacleDetectionRadius: 1.25
+  obstacleDetectionRadius: 1.5
   playerRadius: 4
   distanceClamp: 20
-  duration: 1
+  duration: 0.5
   speed: 4
   idleState: {fileID: 6426981777783663359}
   attackState: {fileID: 12903695170078101}
   lastKnownPosition: {x: 0, y: 0}
   dropletCounter: 0
-  maxDroplets: 3
+  maxDroplets: 7
   isFollowingDroplets: 0
+  dropletDiscard: 3
 --- !u!1 &6523876783623415289
 GameObject:
   m_ObjectHideFlags: 0
@@ -284,7 +285,7 @@ MonoBehaviour:
   - {x: 0.0024167895, y: -0.4863662, z: 0}
   m_ShapePathHash: 2108936961
   m_Mesh: {fileID: 0}
-  m_InstanceId: -1622
+  m_InstanceId: -6044
   m_LocalBounds:
     m_Center: {x: 0.0039272606, y: 0.0015105307, z: 0}
     m_Extent: {x: 0.48485586, y: 0.48787674, z: 0}
