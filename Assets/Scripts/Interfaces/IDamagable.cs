@@ -1,5 +1,5 @@
 public interface IDamageable
 {
-   public void UpdateHealth(int newHealthValue);   
-   public void ReceiveDamage(int damage);
+   public void UpdateHealth(float newHealthValue);   
+   public void ReceiveDamage(float damage);
 }

@@ -7,7 +7,7 @@ using UnityEngine;
 public class PlayerScript : MonoBehaviour,IDamageable
 {
     public int ammo;
-    [SerializeField] private float health;
+    public float health;
 
     [SerializeField] public InventoryManager inventory;
 
@@ -170,13 +170,22 @@ public class PlayerScript : MonoBehaviour,IDamageable
 		}
     }
 
-   public void UpdateHealth(int newHealthValue)
-   {
+    void Respawn()
+    {
+        if(health <= 0)
+        {
+            this.transform.position = spawner.transform.position;
+        }
+    }
 
+   public void UpdateHealth(float newHealthValue)
+   {
+        health = newHealthValue;
    }
-   public void ReceiveDamage(int damage)
+   public void ReceiveDamage(float damage)
    {
-
+        var updatedHealth = health - damage;
+        UpdateHealth(updatedHealth > 0 ? updatedHealth : 0);
    }
 
     private void OnDrawGizmos()

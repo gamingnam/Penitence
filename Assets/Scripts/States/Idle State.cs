@@ -6,43 +6,46 @@ using UnityEngine;
 
 public class IdleState : State
 {
-    public State chaseState;
-    public State poopState;
 
+    #region General
+    [Header("General")]
+    public bool showGizmos;
+    #endregion
+
+    #region States to transition to
+    [Header("States to transition to")]
+    public State chaseState;
+    public State attackState;
+    #endregion
+
+    #region Tracking the Player
+    [Header("Tracking the Player")]
+    [SerializeField] private GameObject enemy;
     [SerializeField] private Transform enemyTransform;
     [SerializeField] private float playerRadius;   
     [SerializeField] private LayerMask playerMask;
-
-    public enum baseStates
-    {
-        Idle,
-        chase,
-        wonder,
-        stalk
-    }
-
-    public baseStates baseState;
+    #endregion
+    
 
     public override State RunCurrentState()
     {
-
         if (isPlayerNear())
         {
-            baseState = baseStates.chase;
+            showGizmos = false;
+            if(enemy.gameObject.tag == "StaticEnemy")
+            {
+                return attackState;
+            }
+            else
+            {
+                return chaseState; 
+            }
         }
-        switch (baseState)
+        else
         {
-            case baseStates.chase:
-                return chaseState;
-            case baseStates.wonder:
-                return poopState;
-            default:
-                return this;
-
+            showGizmos = true;
         }
-
-       
-
+        return this;
     }
 
     private bool isPlayerNear()
@@ -51,9 +54,12 @@ public class IdleState : State
     }
 
     private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(enemyTransform.position, playerRadius);
+    {   
+        if(showGizmos)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(enemyTransform.position, playerRadius);
+        }
     }
 
 
