@@ -4,11 +4,6 @@ using UnityEngine;
 
 public class ChaseState : State
 {
-    /*TODO:
-      Find a way to make it go one droplet at a time
-     */
-    //THE Y SCALE FOR THE WALL CANNOT BE SMALLER THAN 10
-
     #region General
     [Header("General")]
     [SerializeField] private bool showGizmos = true;
@@ -110,6 +105,13 @@ public class ChaseState : State
         return this; // Remain in ChaseState
     }
 
+    #region
+    /// <summary>
+    /// Takes the last known position of the player and creates droplets every set amount of seconds for the enemy got to and collect , if the player is near the latest droplet it will go back to chasing the player
+    /// </summary>
+    /// <param name="position">the last known position of the player</param>
+    /// <param name="duration">the amount of time it should wait to create a new droplet</param>
+    #endregion
     public IEnumerator FollowDroplet(Vector2 position, float duration)
     {
         if (droplets.Count == 0)
@@ -156,9 +158,9 @@ public class ChaseState : State
 
     #region 
     /// <summary>
-    /// Guesses where the player is by adding the player's position by random point inside a unit circle multiplied by a float value
+    /// Calculates the distance between the player and the enemy and gets a new droplet position around the circumstance of the playerRadius
     /// </summary>
-    /// <returns> The sum of the player position and the multiplied unit circle value </returns>
+    /// <returns> The position where the droplet should be on the playerRadius based on the direction of the player </returns>
     #endregion
     private Vector2 CalculateNextDropPos()
     {
@@ -177,12 +179,26 @@ public class ChaseState : State
         return proposedPosition;
     }
 
+    #region 
+    /// <summary>
+    /// Checks if the droplet is near a wall
+    /// </summary>
+    /// <param name="dropletPos"> a reference to the position of the droplet in order to place the center of the OverlapCircleAll</param>
+    /// <returns></returns>
+    #endregion 
     private bool isDropletNearWall(Vector2 dropletPos)
     {
         Collider2D[] dropletObstacles =  Physics2D.OverlapCircleAll(dropletPos, obstacleDetectionRadius, obstacleLayer);
         return dropletObstacles.Length > 0;
     }
 
+    #region 
+    /// <summary>
+    /// Insanities a droplet at the last known position of the player
+    /// </summary>
+    /// <param name="position">the last known position of the player</param>
+    /// <returns></returns>
+    #endregion
     private GameObject InstantiateDroplet(Vector2 position)
     {
         GameObject droplet = new GameObject("Droplet");
@@ -224,6 +240,12 @@ public class ChaseState : State
         return desiredVelocity - rb.velocity;
     }
 
+    #region 
+    /// <summary>
+    /// Calculates if there are any obstacles in the way of your enemy and adjusts the force of which our enemy is steering away from the obstacle accordingly 
+    /// </summary>
+    /// <returns>The scaled avoidance force</returns>
+    #endregion
     private Vector2 AvoidObstacles()
     {
         Collider2D[] obstacles = Physics2D.OverlapCircleAll(rb.position, obstacleDetectionRadius, obstacleLayer);
@@ -291,6 +313,11 @@ public class ChaseState : State
         return Physics2D.OverlapCircle(enemyTransform.position, attackRadius, playerMask);
     }
 
+    #region 
+    /// <summary>
+    /// if showGizmos is true shows all important aspects of the script visually
+    /// </summary> <summary>
+    #endregion
     private void OnDrawGizmos()
     {
         if (showGizmos)
