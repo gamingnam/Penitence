@@ -124,24 +124,10 @@ public class ChaseState : State
 
             if (droplets.Count > 0)
             {
-                GameObject targetDroplet = droplets.Peek();
-
-                // Check if the droplet is too close or the enemy has reached it
-                if (Vector2.Distance(targetDroplet.transform.position, rb.position) < dropletDiscard || 
-                    (Vector2)targetDroplet.transform.position == rb.position)
-                {
-                    droplets.Dequeue(); // Remove the droplet
-                    dropletCounter++;   // Increment the counter
-
-                    // Destroy the old droplet
-                    Destroy(targetDroplet);
-
-                    // Create a new droplet and enqueue it
-                    Vector2 newDropletPosition = CalculateNextDropPos();
-                    droplets.Enqueue(InstantiateDroplet(newDropletPosition));
-                }
+                lastKnownPosition = droplets.Peek().transform.position;
             }
-            
+
+            // If we've exceeded the max number of droplets or no droplets remain
             if (dropletCounter > maxDroplets || droplets.Count == 0)
             {
                 Debug.Log("Exceeded max droplets or no droplets remain. Transitioning to IdleState.");
@@ -150,7 +136,17 @@ public class ChaseState : State
                 yield break; // Exit the coroutine
             }
 
-            yield return new WaitForSeconds(0.1f);
+            // Change it to be one droplet at a time
+            GameObject targetDroplet = droplets.Peek();
+            if (Vector2.Distance(targetDroplet.transform.position, rb.position) < dropletDiscard || rb.position == (Vector2)targetDroplet.transform.position)
+            {
+                droplets.Dequeue(); // Remove the droplet
+                dropletCounter++;
+
+                // Create a new droplet and enqueue it
+                Vector2 newDropletPosition = CalculateNextDropPos();
+                droplets.Enqueue(InstantiateDroplet(newDropletPosition));
+            }
         }
     }
 
@@ -175,12 +171,6 @@ public class ChaseState : State
         }
 
         return proposedPosition;
-    }
-
-    private bool isDropletNearWall(Vector2 dropletPos)
-    {
-        Collider2D[] dropletObstacles =  Physics2D.OverlapCircleAll(dropletPos, obstacleDetectionRadius, obstacleLayer);
-        return dropletObstacles.Length > 0;
     }
 
     private GameObject InstantiateDroplet(Vector2 position)
@@ -213,7 +203,9 @@ public class ChaseState : State
     private Vector2 CalculateSteeringForce(Vector2 targetPosition)
     {
         Vector2 seekForce = Seek(targetPosition) * seekWeight;
-        Vector2 avoidForce = AvoidObstacles()  * avoidWeight;
+        Vector2 avoidForce = (AvoidObstacles() * avoidWeight) * 85;
+
+        Debug.Log("The avoidence force is" + avoidForce);
 
         return seekForce + avoidForce;
     }
@@ -228,30 +220,29 @@ public class ChaseState : State
     {
         Collider2D[] obstacles = Physics2D.OverlapCircleAll(rb.position, obstacleDetectionRadius, obstacleLayer);
 
-        Vector2 avoidanceForce = Vector2.zero;
+        Vector2 totalAvoidanceForce = Vector2.zero;
+        int count = 0;
 
         foreach (var obstacle in obstacles)
         {
-            // Calculate the direction away from the obstacle
             Vector2 directionAway = (rb.position - (Vector2)obstacle.transform.position).normalized;
+            float distance = Vector2.Distance(rb.position, obstacle.transform.position);
 
-            // Find the perpendicular direction (90 degrees to the directionAway vector)
-            Vector2 perpendicular = new Vector2(-directionAway.y, directionAway.x);
-
-            // Weight the perpendicular force more strongly when close to the obstacle
-            float distanceToObstacle = Vector2.Distance(rb.position, obstacle.transform.position);
-            float weight = Mathf.Clamp(1 / distanceToObstacle, 0, 1); // Clamp weight to avoid excessive forces
-            avoidanceForce += perpendicular * weight;
+            // Stronger avoidance for closer obstacles, weaker for farther ones
+            totalAvoidanceForce += directionAway / Mathf.Max(distance, 0.1f); // Avoid division by zero
+            count++;
         }
 
-        // Gradually blend the avoidance force with the current velocity
-        avoidanceForce = Vector2.Lerp(rb.velocity.normalized, avoidanceForce.normalized, 0.1f);
-
-        // Return a scaled avoidance force
-        return avoidanceForce * speed * 1.5f; // Reduced amplification for smoother steering
+        if (count > 0)
+        {
+            totalAvoidanceForce /= count; // Average the avoidance force
         }
 
+        // Limit the maximum strength of the avoidance force
+        totalAvoidanceForce = totalAvoidanceForce.normalized * Mathf.Min(totalAvoidanceForce.magnitude, speed * 1.5f);
 
+        return totalAvoidanceForce;
+    }
 
     private void ApplySteering(Vector2 force)
     {
@@ -316,12 +307,6 @@ public class ChaseState : State
             foreach (var droplet in droplets)
             {
                 Gizmos.DrawWireSphere(droplet.transform.position, 0.2f);
-
-                if(isDropletNearWall(droplet.transform.position))
-                {
-                    Gizmos.DrawWireSphere(droplet.transform.position, obstacleDetectionRadius);
-                }
-                
             }
         }
     }
