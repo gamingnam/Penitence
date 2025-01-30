@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ChaseState : State
 {
+    //TODO: Make it so we dectect player using Raycasts in 8 caridnal direction
     #region General
     [Header("General")]
     [SerializeField] private bool showGizmos = true;
@@ -47,8 +48,10 @@ public class ChaseState : State
     [SerializeField] private Vector2 lastKnownPosition;
     [SerializeField] private int dropletCounter;
     [SerializeField] private int maxDroplets;
+    [SerializeField] private int rayCount;
     [SerializeField] private bool isFollowingDroplets;
     [SerializeField] private float dropletDiscard;
+    [SerializeField] private float avoidenceLerp;
     private Queue<GameObject> droplets = new Queue<GameObject>(); // Queue of GameObjects (droplets)
     #endregion
 
@@ -248,30 +251,65 @@ public class ChaseState : State
     #endregion
     private Vector2 AvoidObstacles()
     {
-        Collider2D[] obstacles = Physics2D.OverlapCircleAll(rb.position, obstacleDetectionRadius, obstacleLayer);
-
         Vector2 avoidanceForce = Vector2.zero;
+
+        // Get all obstacles in range using OverlapCircle
+        Collider2D[] obstacles = Physics2D.OverlapCircleAll(rb.position, obstacleDetectionRadius, obstacleLayer);
 
         foreach (var obstacle in obstacles)
         {
-            // Calculate the direction away from the obstacle
-            Vector2 directionAway = (rb.position - (Vector2)obstacle.transform.position).normalized;
+            // Check if the obstacle is blocking the path using raycasting
+            Vector2 directionToObstacle = ((Vector2)obstacle.transform.position - rb.position).normalized;
 
-            // Find the perpendicular direction (90 degrees to the directionAway vector)
-            Vector2 perpendicular = new Vector2(-directionAway.y, directionAway.x);
+            // Cast a ray from the enemy to the obstacle to check for line-of-sight
+            RaycastHit2D hit = Physics2D.Raycast(rb.position, directionToObstacle, obstacleDetectionRadius, obstacleLayer);
 
-            // Weight the perpendicular force more strongly when close to the obstacle
-            float distanceToObstacle = Vector2.Distance(rb.position, obstacle.transform.position);
-            float weight = Mathf.Clamp(1 / distanceToObstacle, 0, 1); // Clamp weight to avoid excessive forces
-            avoidanceForce += perpendicular * weight;
+            if (hit.collider != null && hit.collider == obstacle)
+            {
+                // Calculate the direction away from the obstacle
+                Vector2 directionAway = (rb.position - (Vector2)obstacle.transform.position).normalized;
+
+                // Calculate the perpendicular direction (90 degrees to the directionAway vector)
+                Vector2 perpendicular = new Vector2(-directionAway.y, directionAway.x);
+
+                // Use the distance to obstacle to scale the avoidance force more strongly as we get closer
+                float distanceToObstacle = Vector2.Distance(rb.position, obstacle.transform.position);
+                float weight = Mathf.Clamp(1 / distanceToObstacle, 0, 1); // Clamped weight to prevent excessive forces
+
+                // Apply the avoidance force in the perpendicular direction, scaled by the distance
+                avoidanceForce += perpendicular * weight;
+            }
+        }
+
+        // Check if any droplets are visible and avoid them if not blocked by an obstacle
+        foreach (var droplet in droplets)
+        {
+            // Cast a ray to the droplet position to see if it's visible (i.e., no obstacles in between)
+            RaycastHit2D hit = Physics2D.Raycast(rb.position, ((Vector2)droplet.transform.position - rb.position).normalized, playerRadius, obstacleLayer);
+
+            // If the ray hits an obstacle or does not hit the droplet, it's not visible
+            if (hit.collider == null || hit.collider.gameObject != droplet)
+            {
+                // Avoid the droplet since it's not visible to the enemy
+                Vector2 directionAway = (rb.position - (Vector2)droplet.transform.position).normalized;
+                Vector2 perpendicular = new Vector2(-directionAway.y, directionAway.x);
+
+                // Avoidance force, scaled by the distance to the droplet
+                float distanceToDroplet = Vector2.Distance(rb.position, droplet.transform.position);
+                float weight = Mathf.Clamp(1 / distanceToDroplet, 0, 1); // Avoidance weight based on distance
+
+                avoidanceForce += perpendicular * weight;
+            }
         }
 
         // Gradually blend the avoidance force with the current velocity
-        avoidanceForce = Vector2.Lerp(rb.velocity.normalized, avoidanceForce.normalized, 0.1f);
+        avoidanceForce = Vector2.Lerp(rb.velocity.normalized, avoidanceForce.normalized, avoidenceLerp);
 
-        // Return a scaled avoidance force
-        return avoidanceForce * speed * 1.5f; // Reduced amplification for smoother steering
-        }
+        // Return the final avoidance force, scaled to the enemy's speed for smoother movement
+        return avoidanceForce * speed * 1.5f;
+    }
+
+
 
 
 
@@ -305,7 +343,41 @@ public class ChaseState : State
 
     private bool isPlayerNear()
     {
-        return Physics2D.OverlapCircle(enemyTransform.position, playerRadius, playerMask);
+        // Calculate the directions dynamically based on rayCount
+        Vector2[] directions = new Vector2[rayCount];
+        float angleStep = 360f / rayCount; // Evenly space the rays in a circle
+
+        for (int i = 0; i < rayCount; i++)
+        {
+            float angle = i * angleStep;
+            directions[i] = new Vector2(Mathf.Cos(Mathf.Deg2Rad * angle), Mathf.Sin(Mathf.Deg2Rad * angle)).normalized;
+        }
+
+        // Cast the rays and check for a player hit, ignoring rays that hit obstacles
+        foreach (Vector2 direction in directions)
+        {            
+
+            // Cast a ray to check if it hits any obstacle
+            RaycastHit2D hit = Physics2D.Raycast(enemyTransform.position, direction, playerRadius, obstacleLayer);
+
+            // If the ray hits an obstacle, stop the raycast and ignore any further detection
+            if (hit.collider != null && ((1 << hit.collider.gameObject.layer) & obstacleLayer) != 0)
+            {
+                continue; // Skip this ray if it hits an obstacle
+            }
+
+            // Cast the ray again to check for the player, ensuring the ray is valid
+            RaycastHit2D playerHit = Physics2D.Raycast(enemyTransform.position, direction, playerRadius, playerMask);
+
+            // If the ray hits the player directly (without hitting an obstacle), return true
+            if (playerHit.collider != null && ((1 << playerHit.collider.gameObject.layer) & playerMask) != 0)
+            {
+                return true; // Player detected without obstacles
+            }
+            
+        }
+
+        return false; // No clear line of sight to the player
     }
 
     private bool isPlayerInAttackRange()
@@ -325,9 +397,6 @@ public class ChaseState : State
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(rb.position, obstacleDetectionRadius);
 
-            Gizmos.color = Color.blue;
-            Gizmos.DrawWireSphere(enemyTransform.position, playerRadius);
-
             Gizmos.color = Color.white;
             Gizmos.DrawWireSphere(enemyTransform.position, attackRadius);
 
@@ -344,11 +413,44 @@ public class ChaseState : State
             {
                 Gizmos.DrawWireSphere(droplet.transform.position, 0.2f);
 
-                if(isDropletNearWall(droplet.transform.position))
+                if (isDropletNearWall(droplet.transform.position))
                 {
                     Gizmos.DrawWireSphere(droplet.transform.position, obstacleDetectionRadius);
                 }
-                
+
+            }
+
+            // Debug the raycasts to visualize their dynamic lengths
+            Gizmos.color = Color.yellow; // Ray color for visibility
+
+            // Calculate the directions dynamically based on rayCount
+            Vector2[] directions = new Vector2[rayCount];
+            float angleStep = 360f / rayCount; // Evenly space the rays in a circle
+
+            // Populate the directions array with evenly spaced angles
+            for (int i = 0; i < rayCount; i++)
+            {
+                float angle = i * angleStep;
+                directions[i] = new Vector2(Mathf.Cos(Mathf.Deg2Rad * angle), Mathf.Sin(Mathf.Deg2Rad * angle)).normalized;
+            }
+
+            // Draw rays in a circle from the enemy's position
+            foreach (Vector2 direction in directions)
+            {
+                // Cast a ray to check if it hits any obstacle
+                RaycastHit2D hit = Physics2D.Raycast(enemyTransform.position, direction, playerRadius, obstacleLayer);
+
+                // Calculate the dynamic ray length
+                float rayLength = playerRadius;
+                if (hit.collider != null && ((1 << hit.collider.gameObject.layer) & obstacleLayer) != 0)
+                {
+                    // If an obstacle is hit, reduce the ray length based on proximity to the obstacle
+                    float distanceToObstacle = Vector2.Distance(enemyTransform.position, hit.point);
+                    rayLength = Mathf.Clamp(playerRadius - distanceToObstacle, 0f, playerRadius);
+                }
+
+                // Draw the dynamic-length ray
+                Gizmos.DrawLine(enemyTransform.position, (Vector2)enemyTransform.position + direction * rayLength);
             }
         }
     }
