@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ChaseState : State
 {
-    //TODO: Make it so we dectect player using Raycasts in 8 caridnal direction
+    //TODO: Make it so we detect player using Raycasts in 8 cardinal directions
     #region General
     [Header("General")]
     [SerializeField] private bool showGizmos = true;
@@ -53,6 +53,12 @@ public class ChaseState : State
     [SerializeField] private float dropletDiscard;
     [SerializeField] private float avoidenceLerp;
     private Queue<GameObject> droplets = new Queue<GameObject>(); // Queue of GameObjects (droplets)
+    #endregion
+
+    #region Stuck Detection
+    [Header("Stuck Detection")]
+    [SerializeField] private float stuckThresholdTime = 0.1f;  // Time to consider the enemy "stuck"
+    private float stuckTimer = 0f;
     #endregion
 
     public void Start()
@@ -131,6 +137,11 @@ public class ChaseState : State
             {
                 GameObject targetDroplet = droplets.Peek();
 
+                if (targetDroplet == null) 
+                {
+                    droplets.Enqueue(InstantiateDroplet(position));
+                }
+
                 // Check if droplet is within line of sight
                 RaycastHit2D hit = Physics2D.Raycast(rb.position, ((Vector2)targetDroplet.transform.position - rb.position).normalized, playerRadius, obstacleLayer);
                 if (hit.collider != null && hit.collider.gameObject != targetDroplet)
@@ -150,9 +161,6 @@ public class ChaseState : State
                     Destroy(targetDroplet);
                     dropletCounter++;
 
-                    //TASK 2.) CHANGE IT SO THAT WE SPAWN DROPLET ON PLAYER POSITION
-                    //yield return new WaitForSeconds(1);
-                    // Create a new droplet and enqueue it
                     Vector2 newDropletPosition = CalculateNextDropPos();
                     droplets.Enqueue(InstantiateDroplet(newDropletPosition));
                 }
@@ -208,7 +216,7 @@ public class ChaseState : State
 
     #region 
     /// <summary>
-    /// Insanities a droplet at the last known position of the player
+    /// Instantiates a droplet at the last known position of the player
     /// </summary>
     /// <param name="position">the last known position of the player</param>
     /// <returns></returns>
@@ -235,7 +243,7 @@ public class ChaseState : State
 
     #region
     /// <summary>
-    /// Calculates the force of which our enemy AI steers itself towards our desired target multiped by our weights  
+    /// Calculates the force of which our enemy AI steers itself towards our desired target multiplied by our weights  
     /// </summary>
     /// <param name="targetPosition">The target we want our AI to chase after</param>
     /// <returns>the sum of the seekForce and avoidForce in order to determine the total force it should steer itself towards our target</returns> 
