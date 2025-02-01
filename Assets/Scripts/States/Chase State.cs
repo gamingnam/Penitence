@@ -119,7 +119,7 @@ public class ChaseState : State
     {
         if (droplets.Count == 0)
         {
-            droplets.Enqueue(InstantiateDroplet(position)); // Create the first droplet
+            droplets.Enqueue(InstantiateDroplet(position));
             dropletCounter = 1;
         }
 
@@ -131,28 +131,39 @@ public class ChaseState : State
             {
                 GameObject targetDroplet = droplets.Peek();
 
-                // Check if the droplet is too close or the enemy has reached it
-                if (Vector2.Distance(targetDroplet.transform.position, rb.position) < dropletDiscard || 
-                    (Vector2)targetDroplet.transform.position == rb.position)
+                // Check if droplet is within line of sight
+                RaycastHit2D hit = Physics2D.Raycast(rb.position, ((Vector2)targetDroplet.transform.position - rb.position).normalized, playerRadius, obstacleLayer);
+                if (hit.collider != null && hit.collider.gameObject != targetDroplet)
                 {
-                    droplets.Dequeue(); // Remove the droplet
-                    dropletCounter++;   // Increment the counter
-
-                    // Destroy the old droplet
+                    droplets.Dequeue();
                     Destroy(targetDroplet);
+                    //Create a new droplet in the part that is not next to the wall
 
+                    dropletCounter++;
+                    continue; // Skip to the next iteration
+                }
+
+                // Check if the droplet is too close or reached
+                if (Vector2.Distance(targetDroplet.transform.position, rb.position) < dropletDiscard || hit.collider.gameObject == targetDroplet)
+                {
+                    droplets.Dequeue();
+                    Destroy(targetDroplet);
+                    dropletCounter++;
+
+                    //TASK 2.) CHANGE IT SO THAT WE SPAWN DROPLET ON PLAYER POSITION
+                    //yield return new WaitForSeconds(1);
                     // Create a new droplet and enqueue it
                     Vector2 newDropletPosition = CalculateNextDropPos();
                     droplets.Enqueue(InstantiateDroplet(newDropletPosition));
                 }
             }
-            
+
             if (dropletCounter > maxDroplets || droplets.Count == 0)
             {
                 Debug.Log("Exceeded max droplets or no droplets remain. Transitioning to IdleState.");
                 StopAllCoroutines();
                 isFollowingDroplets = false;
-                yield break; // Exit the coroutine
+                yield break;
             }
 
             yield return new WaitForSeconds(0.1f);
@@ -191,7 +202,7 @@ public class ChaseState : State
     #endregion 
     private bool isDropletNearWall(Vector2 dropletPos)
     {
-        Collider2D[] dropletObstacles =  Physics2D.OverlapCircleAll(dropletPos, obstacleDetectionRadius, obstacleLayer);
+        Collider2D[] dropletObstacles = Physics2D.OverlapCircleAll(dropletPos, obstacleDetectionRadius, obstacleLayer);
         return dropletObstacles.Length > 0;
     }
 
@@ -232,7 +243,7 @@ public class ChaseState : State
     private Vector2 CalculateSteeringForce(Vector2 targetPosition)
     {
         Vector2 seekForce = Seek(targetPosition) * seekWeight;
-        Vector2 avoidForce = AvoidObstacles()  * avoidWeight;
+        Vector2 avoidForce = AvoidObstacles() * avoidWeight;
 
         return seekForce + avoidForce;
     }
@@ -243,76 +254,71 @@ public class ChaseState : State
         return desiredVelocity - rb.velocity;
     }
 
-    #region 
+    #region
     /// <summary>
-    /// Calculates if there are any obstacles in the way of your enemy and adjusts the force of which our enemy is steering away from the obstacle accordingly 
+    /// Calculates an avoidance force to prevent collisions with obstacles and droplets.
+    /// Uses raycasts to detect obstacles and applies emergency repulsion if too close.
     /// </summary>
-    /// <returns>The scaled avoidance force</returns>
+    /// <returns>Vector2 representing the avoidance force</returns>
     #endregion
     private Vector2 AvoidObstacles()
     {
         Vector2 avoidanceForce = Vector2.zero;
+        float angleStep = 360f / rayCount;
+        float emergencyDistance = 0.5f;
+        bool emergencyRepulsion = false;
 
-        // Get all obstacles in range using OverlapCircle
-        Collider2D[] obstacles = Physics2D.OverlapCircleAll(rb.position, obstacleDetectionRadius, obstacleLayer);
-
-        foreach (var obstacle in obstacles)
+        for (int i = 0; i < rayCount; i++)
         {
-            // Check if the obstacle is blocking the path using raycasting
-            Vector2 directionToObstacle = ((Vector2)obstacle.transform.position - rb.position).normalized;
+            float angle = i * angleStep;
+            Vector2 direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+            RaycastHit2D hit = Physics2D.Raycast(rb.position, direction, obstacleDetectionRadius, obstacleLayer);
 
-            // Cast a ray from the enemy to the obstacle to check for line-of-sight
-            RaycastHit2D hit = Physics2D.Raycast(rb.position, directionToObstacle, obstacleDetectionRadius, obstacleLayer);
-
-            if (hit.collider != null && hit.collider == obstacle)
+            if (hit.collider != null)
             {
-                // Calculate the direction away from the obstacle
-                Vector2 directionAway = (rb.position - (Vector2)obstacle.transform.position).normalized;
+                float distanceToObstacle = Vector2.Distance(rb.position, hit.point);
 
-                // Calculate the perpendicular direction (90 degrees to the directionAway vector)
-                Vector2 perpendicular = new Vector2(-directionAway.y, directionAway.x);
-
-                // Use the distance to obstacle to scale the avoidance force more strongly as we get closer
-                float distanceToObstacle = Vector2.Distance(rb.position, obstacle.transform.position);
-                float weight = Mathf.Clamp(1 / distanceToObstacle, 0, 1); // Clamped weight to prevent excessive forces
-
-                // Apply the avoidance force in the perpendicular direction, scaled by the distance
-                avoidanceForce += perpendicular * weight;
+                if (distanceToObstacle < emergencyDistance)
+                {
+                    // Strong repulsion force to prevent getting stuck against walls
+                    emergencyRepulsion = true;
+                    Vector2 repulsionForce = (rb.position - (Vector2)hit.point).normalized * (1f / (distanceToObstacle + 0.1f)) * 10f;
+                    avoidanceForce += repulsionForce;
+                }
+                else
+                {
+                    // Standard avoidance: calculate a perpendicular force to gradually steer away
+                    Vector2 directionAway = (rb.position - (Vector2)hit.point).normalized;
+                    Vector2 perpendicular = Vector2.Perpendicular(directionAway);
+                    float weight = Mathf.Clamp(1f / (distanceToObstacle + 0.1f), 0.1f, 1f);
+                    avoidanceForce += perpendicular * weight * 0.5f;
+                }
             }
         }
 
-        // Check if any droplets are visible and avoid them if not blocked by an obstacle
+        // Also avoid droplets that might be in the way
         foreach (var droplet in droplets)
         {
-            // Cast a ray to the droplet position to see if it's visible (i.e., no obstacles in between)
             RaycastHit2D hit = Physics2D.Raycast(rb.position, ((Vector2)droplet.transform.position - rb.position).normalized, playerRadius, obstacleLayer);
-
-            // If the ray hits an obstacle or does not hit the droplet, it's not visible
             if (hit.collider == null || hit.collider.gameObject != droplet)
             {
-                // Avoid the droplet since it's not visible to the enemy
                 Vector2 directionAway = (rb.position - (Vector2)droplet.transform.position).normalized;
-                Vector2 perpendicular = new Vector2(-directionAway.y, directionAway.x);
-
-                // Avoidance force, scaled by the distance to the droplet
+                Vector2 perpendicular = Vector2.Perpendicular(directionAway);
                 float distanceToDroplet = Vector2.Distance(rb.position, droplet.transform.position);
-                float weight = Mathf.Clamp(1 / distanceToDroplet, 0, 1); // Avoidance weight based on distance
-
+                float weight = Mathf.Clamp(1f / (distanceToDroplet + 0.1f), 0f, 1f);
                 avoidanceForce += perpendicular * weight;
             }
         }
 
-        // Gradually blend the avoidance force with the current velocity
-        avoidanceForce = Vector2.Lerp(rb.velocity.normalized, avoidanceForce.normalized, avoidenceLerp);
+        // Adjust blending factor based on emergency repulsion
+        float blendFactor = emergencyRepulsion ? Mathf.Min(avoidenceLerp, 0.2f) : avoidenceLerp;
 
-        // Return the final avoidance force, scaled to the enemy's speed for smoother movement
-        return avoidanceForce * speed * 1.5f;
+        // Blend the avoidance force with the current velocity for smoother motion
+        Vector2 blendedForce = Vector2.Lerp(rb.velocity.normalized, avoidanceForce.normalized, blendFactor);
+
+        // Clamp the final avoidance force to prevent excessive movement changes
+        return Vector2.ClampMagnitude(blendedForce * speed * 1.2f, speed * 0.8f);
     }
-
-
-
-
-
     private void ApplySteering(Vector2 force)
     {
         // Smoothly apply steering force to the velocity
@@ -355,7 +361,7 @@ public class ChaseState : State
 
         // Cast the rays and check for a player hit, ignoring rays that hit obstacles
         foreach (Vector2 direction in directions)
-        {            
+        {
 
             // Cast a ray to check if it hits any obstacle
             RaycastHit2D hit = Physics2D.Raycast(enemyTransform.position, direction, playerRadius, obstacleLayer);
@@ -374,7 +380,7 @@ public class ChaseState : State
             {
                 return true; // Player detected without obstacles
             }
-            
+
         }
 
         return false; // No clear line of sight to the player
