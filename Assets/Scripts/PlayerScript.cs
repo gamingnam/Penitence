@@ -4,10 +4,10 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
-public class PlayerScript : MonoBehaviour
+public class PlayerScript : MonoBehaviour,IDamageable
 {
     public int ammo;
-    private float health;
+    public float health;
 
     [SerializeField] public InventoryManager inventory;
 
@@ -40,6 +40,11 @@ public class PlayerScript : MonoBehaviour
     private SpriteRenderer sr;
 
     public Transform muzzle;
+
+    [SerializeField] private GameObject spawner;
+    [SerializeField] private LayerMask spawnerMask;
+    [SerializeField] private int spawnerRadius;
+    
     public UnityEngine.Rendering.Universal.Light2D muzzleflash;
 
     // Start is called before the first frame update
@@ -67,6 +72,7 @@ public class PlayerScript : MonoBehaviour
 
         ShootHandler();
         InventoryHandler();
+        RespawnParse();
     }
     private void LateUpdate()
     {
@@ -74,22 +80,23 @@ public class PlayerScript : MonoBehaviour
     }
     void FixedUpdate()
     {
-        rb.velocity = dir * speed*Time.deltaTime;
+        rb.velocity = dir * speed * Time.deltaTime;
     }
 
     private void ShootHandler()
     {
         if (Input.GetButtonDown("Fire1") && InventoryManager.isInventoryOpened == false)
         {
-            if(ammo > 0) {
+            if (ammo > 0)
+            {
                 StartCoroutine(Shake());
                 muzzleflash.intensity = 50f;
                 AudioSource.PlayClipAtPoint(gunShot, transform.position, 1f);
-                RaycastHit2D hit = Physics2D.Raycast(firePoint.position, (Vector2)mouseWorldPosition -  (Vector2)firePoint.position);
+                RaycastHit2D hit = Physics2D.Raycast(firePoint.position, (Vector2)mouseWorldPosition - (Vector2)firePoint.position);
                 if (hit)
                 {
                     Debug.Log(hit.collider.gameObject.name);
-                    if(hit.collider.gameObject.tag == "Enemy")
+                    if (hit.collider.gameObject.tag == "Enemy")
                     {
                         hit.collider.gameObject.GetComponent<Enemy>().ReceiveDamage(30);
                     }
@@ -115,10 +122,10 @@ public class PlayerScript : MonoBehaviour
     private void CameraHandler()
     {
         float magnitude = 2f;
-        float xMidpoint = Mathf.Clamp((mouseWorldPosition.x - transform.position.x)/2,-magnitude,magnitude);
-        float yMidpoint = Mathf.Clamp((mouseWorldPosition.y - transform.position.y) / 2, -magnitude,magnitude);
+        float xMidpoint = Mathf.Clamp((mouseWorldPosition.x - transform.position.x) / 2, -magnitude, magnitude);
+        float yMidpoint = Mathf.Clamp((mouseWorldPosition.y - transform.position.y) / 2, -magnitude, magnitude);
 
-        _cam.transform.position = Vector3.SmoothDamp(_cam.transform.position, new Vector3(transform.position.x+xMidpoint,transform.position.y+yMidpoint,-1f) , ref velocity, smooth);
+        _cam.transform.position = Vector3.SmoothDamp(_cam.transform.position, new Vector3(transform.position.x + xMidpoint, transform.position.y + yMidpoint, -1f), ref velocity, smooth);
 
     }
     IEnumerator Shake()
@@ -142,8 +149,47 @@ public class PlayerScript : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if(inventory.selectedItem != null)
+            if (inventory.selectedItem != null)
                 inventory.selectedItem.Use(this);
         }
+    }
+
+    void RespawnParse()
+    {
+        Collider2D[] circleCols = Physics2D.OverlapCircleAll(this.transform.position, spawnerRadius, spawnerMask);
+		for (int i = 0; i < circleCols.Length; i++)
+		{
+            Collider2D circleCol = circleCols[i];
+			if (circleCol == spawner || circleCol == null)
+			{
+                continue; 
+			}
+
+            spawner = circleCol.gameObject;
+            break;
+		}
+    }
+
+    void Respawn()
+    {
+        if(health <= 0)
+        {
+            this.transform.position = spawner.transform.position;
+        }
+    }
+
+   public void UpdateHealth(float newHealthValue)
+   {
+        health = newHealthValue;
+   }
+   public void ReceiveDamage(float damage)
+   {
+        var updatedHealth = health - damage;
+        UpdateHealth(updatedHealth > 0 ? updatedHealth : 0);
+   }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(this.transform.position, spawnerRadius);
     }
 }
