@@ -28,6 +28,13 @@ public class IdleState : State
     [SerializeField] private AIDestinationSetter aiDestinationSetter;
     public AIPath aiPath;
     public bool isMoving = false;
+    public readonly int maxRetries;
+    [SerializeField] [Range(1f,40f)] private float minDistanceBetweenPoints;
+    [Range(0.5f, 2.0f)] public float randomDistanceFactor = 1.0f;
+
+    [SerializeField] private float stuckTimeThreshold = 3.0f; // Time threshold before considering the AI stuck (in seconds)
+    [SerializeField] private float timeSinceLastMovement = 0.0f; // Timer to track how long since the AI last moved
+    [SerializeField] private Vector3 lastKnownPosition;
     #endregion
 
     void Start()
@@ -43,6 +50,12 @@ public class IdleState : State
         if (!aiPath.pathPending && aiPath.reachedDestination && !isMoving)
         {
             pointToGoTowards();
+        }
+        // Check if the AI is stuck (not moving for too long)
+        if (IsAIStuck())
+        {
+            Debug.Log("AI is stuck, teleporting to a random location!");
+            TeleportToRandomLocation(); // Teleport AI to a random position
         }
         
         if (isPlayerNear())
@@ -123,18 +136,38 @@ public class IdleState : State
         return point; // Return the new GameObject (destination point)
     }
 
-  private Vector3 PickRandomPoint()
+    
+
+    private Vector3 PickRandomPoint()
     {
         Vector3 randomPoint = new Vector3(Random.Range(0, grid.width), Random.Range(0, grid.depth)); // Random point in grid
         randomPoint.z = 0; // Ensure it's 2D movement
         randomPoint += transform.position; // Offset from AI's position
+        Vector3 lastPosition = Vector3.zero;
+        int retries = 0;
+        
+        float randomMaxDistance = minDistanceBetweenPoints * Random.Range(0.5f,randomDistanceFactor);
+
+        // Ensure the new point is sufficiently far from the last one
+        while (Vector3.Distance(randomPoint, lastPosition) < minDistanceBetweenPoints)
+        {
+            // Keep generating a new point until it's far enough from the last point
+            randomPoint = new Vector3(Random.Range(0, grid.width), Random.Range(0, grid.depth));
+            randomPoint.z = 0;
+            randomPoint += transform.position;
+            if (retries >= maxRetries)
+            {
+                Debug.LogWarning("⚠️ Maximum retries reached. Using the last valid point.");
+                break; // Exit loop if max retries are reached
+            }
+        }
 
         // Ensure the point is on a walkable node and valid
         GraphNode node = AstarPath.active.GetNearest(randomPoint).node;
 
         if (node != null && node.Walkable)
         {
-            Debug.Log($"Picked valid point: {randomPoint}.");
+            lastPosition = randomPoint; // Update last valid position
             return (Vector3)node.position;
         }
         else
@@ -143,6 +176,33 @@ public class IdleState : State
             return PickRandomPoint(); // Retry if the point is invalid
         }
     }
+
+    private bool IsAIStuck()
+    {
+        // Calculate how much time has passed since the last movement
+        if (Vector3.Distance(aiPath.transform.position, lastKnownPosition) < 0.1f)
+        {
+            timeSinceLastMovement += Time.deltaTime; // Increase the timer if AI has not moved
+        }
+        else
+        {
+            timeSinceLastMovement = 0f; // Reset the timer if AI has moved
+            lastKnownPosition = aiPath.transform.position; // Update last known position
+        }
+
+        // If the AI has been stuck for longer than the threshold, consider it stuck
+        return timeSinceLastMovement >= stuckTimeThreshold;
+    }
+
+    // Teleport the AI to a random position on the map
+    private void TeleportToRandomLocation()
+    {
+        Vector3 randomPoint = PickRandomPoint(); // Pick a random valid point
+        aiPath.Teleport(randomPoint); // Teleport AI to the random position
+        aiPath.destination = randomPoint; // Set the destination to the new random point
+        timeSinceLastMovement = 0f; // Reset the stuck timer
+    }
+
 
 
     private void OnDrawGizmos()
