@@ -28,8 +28,6 @@ public class IdleState : State
     [SerializeField] private AIDestinationSetter aiDestinationSetter;
     public AIPath aiPath;
     public bool isMoving = false;
-    public float timer;
-
     #endregion
 
     void Start()
@@ -42,7 +40,6 @@ public class IdleState : State
 
     public override State RunCurrentState()
     {
-        timer += Time.deltaTime;
         if (!aiPath.pathPending && aiPath.reachedDestination && !isMoving)
         {
             pointToGoTowards();
@@ -108,39 +105,42 @@ public class IdleState : State
         return false; // No clear line of sight to the player
     }
 
-    private void pointToGoTowards()
+    private GameObject pointToGoTowards()
     {
-       if (isMoving)
-       {
-         return;
-       }
+        // Create a new point with a trigger collider
+        if (point != null) {Destroy(point);} // Destroy the old point if it exists
 
-
-        isMoving = true; // Mark as moving
         Vector3 randomPoint = PickRandomPoint(); // Get a valid point
-        aiPath.destination = randomPoint;
-        aiPath.canMove = true;
-        aiPath.SearchPath(); // Ensure AI recalculates its path
+        point = new GameObject("Point");
+        point.transform.position = randomPoint;
+        CircleCollider2D cirCollider = point.AddComponent<CircleCollider2D>(); // Add a collider to the point
+        cirCollider.isTrigger = true; // Set collider as trigger
+        aiPath.destination = randomPoint; // Set the new destination for the AI
 
-        Debug.Log($"🎯 AI destination set to: {aiPath.destination}");
+        Debug.Log($"🎯 AI destination set to: {randomPoint}");
+        point.tag = "Destination";
+
+        return point; // Return the new GameObject (destination point)
     }
 
-    private Vector3 PickRandomPoint()
+  private Vector3 PickRandomPoint()
     {
-        Vector3 point = new Vector3(Random.Range(0,grid.depth), Random.Range(0,grid.width)); // Random point in a circle
-        point.z = 0; // Ensure it's 2D movement
-        point += enemyTransform.position; // Offset from AI position
+        Vector3 randomPoint = new Vector3(Random.Range(0, grid.width), Random.Range(0, grid.depth)); // Random point in grid
+        randomPoint.z = 0; // Ensure it's 2D movement
+        randomPoint += transform.position; // Offset from AI's position
 
-        // Ensure the point is on a walkable node
-        GraphNode node = AstarPath.active.GetNearest(point).node;
+        // Ensure the point is on a walkable node and valid
+        GraphNode node = AstarPath.active.GetNearest(randomPoint).node;
+
         if (node != null && node.Walkable)
         {
+            Debug.Log($"Picked valid point: {randomPoint}.");
             return (Vector3)node.position;
         }
         else
         {
             Debug.LogWarning("⚠️ Picked an unwalkable point, retrying...");
-            return PickRandomPoint(); // Try again if the point is invalid
+            return PickRandomPoint(); // Retry if the point is invalid
         }
     }
 
