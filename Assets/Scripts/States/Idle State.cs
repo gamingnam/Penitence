@@ -1,7 +1,4 @@
-
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using Pathfinding;
 using UnityEngine;
 
 public class IdleState : State
@@ -21,16 +18,36 @@ public class IdleState : State
     #region Tracking the Player
     [Header("Tracking the Player")]
     [SerializeField] private GameObject enemy;
+    [SerializeField] private GameObject point;
     [SerializeField] private Transform enemyTransform;
     [SerializeField] private float playerRadius;
     [SerializeField] private int rayCount;
     [SerializeField] private LayerMask playerMask;
     [SerializeField] private LayerMask obstacleLayer;
+    private GridGraph grid;
+    [SerializeField] private AIDestinationSetter aiDestinationSetter;
+    public AIPath aiPath;
+    public bool isMoving = false;
+    public float timer;
+
     #endregion
 
+    void Start()
+    {
+        grid = AstarPath.active.data.gridGraph;
+        aiDestinationSetter = enemy.GetComponent<AIDestinationSetter>();
+        aiPath = enemy.GetComponent<AIPath>();
+        pointToGoTowards();
+    }
 
     public override State RunCurrentState()
     {
+        timer += Time.deltaTime;
+        if (!aiPath.pathPending && aiPath.reachedDestination && !isMoving)
+        {
+            pointToGoTowards();
+        }
+        
         if (isPlayerNear())
         {
             showGizmos = false;
@@ -47,8 +64,12 @@ public class IdleState : State
         {
             showGizmos = true;
         }
+
+        
+
         return this;
     }
+    
 
     private bool isPlayerNear()
     {
@@ -86,6 +107,43 @@ public class IdleState : State
 
         return false; // No clear line of sight to the player
     }
+
+    private void pointToGoTowards()
+    {
+       if (isMoving)
+       {
+         return;
+       }
+
+
+        isMoving = true; // Mark as moving
+        Vector3 randomPoint = PickRandomPoint(); // Get a valid point
+        aiPath.destination = randomPoint;
+        aiPath.canMove = true;
+        aiPath.SearchPath(); // Ensure AI recalculates its path
+
+        Debug.Log($"🎯 AI destination set to: {aiPath.destination}");
+    }
+
+    private Vector3 PickRandomPoint()
+    {
+        Vector3 point = new Vector3(Random.Range(0,grid.depth), Random.Range(0,grid.width)); // Random point in a circle
+        point.z = 0; // Ensure it's 2D movement
+        point += enemyTransform.position; // Offset from AI position
+
+        // Ensure the point is on a walkable node
+        GraphNode node = AstarPath.active.GetNearest(point).node;
+        if (node != null && node.Walkable)
+        {
+            return (Vector3)node.position;
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ Picked an unwalkable point, retrying...");
+            return PickRandomPoint(); // Try again if the point is invalid
+        }
+    }
+
 
     private void OnDrawGizmos()
     {   
