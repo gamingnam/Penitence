@@ -26,12 +26,21 @@ public class IdleState : State
 
     void Start()
     {
-
+        enemy = GameObject.FindGameObjectWithTag("StatciEnemy");
+        enemyTransform = enemy.transform; 
     }
 
     public override State RunCurrentState()
     {
-        
+        if (isPlayerNear())
+        {
+            showGizmos = false;
+            return attackState;
+        }
+        else 
+        {
+           showGizmos = true;
+        }
 
         return this;
     }

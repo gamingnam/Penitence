@@ -5,34 +5,38 @@ using UnityEngine;
 
 public class WanderState : State
 {
-    #region
+    #region General
     [Header("General")]
+    [SerializeField] private GameObject enemy;
+    [SerializeField] private Transform enemyTransform;
     public bool showGizmos;
     #endregion
 
     #region States to transition to
     [Header("States to transition to")]
-    public State chaseState;
-    public State attackState;
+    public State pursuitState;
     #endregion
 
-    #region Tracking the Player
-    [Header("Tracking the Player")]
-    [SerializeField] private GameObject enemy;
-    [SerializeField] private GameObject point;
-    [SerializeField] private Transform enemyTransform;
-    private GridGraph grid;
+    #region AStarGrid and Scripts
+    [Header("AStarGrid and Scripts")]
     [SerializeField] private AIDestinationSetter aiDestinationSetter;
     [SerializeField] private AIPath aiPath;
-    public bool isMoving = false;
-    public readonly int maxRetries;
-    [SerializeField][Range(1f, 40f)] private float minDistanceBetweenPoints;
-    [Range(0.5f, 2.0f)] public float randomDistanceFactor = 1.0f;
+    private GridGraph grid;
+    #endregion
 
+
+    #region Tracking the Player
+    [Header("Traversing towards the point")]
+    [SerializeField] private GameObject point;
+    private readonly int maxRetries;
+    [SerializeField][Range(1f, 40f)] private float minDistanceBetweenPoints;
+    [SerializeField][Range(0.5f, 2.0f)] private float randomDistanceFactor = 1.0f;
     [SerializeField] private float stuckTimeThreshold = 3.0f; // Time threshold before considering the AI stuck (in seconds)
     [SerializeField] private float timeSinceLastMovement = 0.0f; // Timer to track how long since the AI last moved
     [SerializeField] private Vector3 lastKnownPosition;
     #endregion
+
+  
 
     private void Start()
     {
@@ -45,7 +49,7 @@ public class WanderState : State
     }
     public override State RunCurrentState()
     {
-        if (!aiPath.pathPending && aiPath.reachedDestination && !isMoving)
+        if (!aiPath.pathPending && aiPath.reachedDestination)
         {
             pointToGoTowards();
         }
