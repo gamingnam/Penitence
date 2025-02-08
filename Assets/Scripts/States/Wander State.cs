@@ -36,7 +36,12 @@ public class WanderState : State
     [SerializeField] private Vector3 lastKnownPosition;
     #endregion
 
-  
+    #region Animation
+    [Header("Animation")]
+    [SerializeField] private Animator animatior;
+    [SerializeField] private Animation animation;
+    #endregion
+
 
     private void Start()
     {
@@ -45,13 +50,13 @@ public class WanderState : State
         grid = AstarPath.active.data.gridGraph;
         aiDestinationSetter = enemy.GetComponent<AIDestinationSetter>();
         aiPath = enemy.GetComponent<AIPath>();
-        pointToGoTowards();
+        aiDestinationSetter.target = pointToGoTowards().transform;
     }
     public override State RunCurrentState()
     {
         if (!aiPath.pathPending && aiPath.reachedDestination)
         {
-            pointToGoTowards();
+            aiDestinationSetter.target = pointToGoTowards().transform;
         }
         // Check if the AI is stuck (not moving for too long)
         if (IsAIStuck())
@@ -63,6 +68,10 @@ public class WanderState : State
         return this;
     }
 
+    /// <summary>
+    /// Creates a point the enemy can traverse towards
+    /// </summary>
+    /// <returns>The point that the enemy traverses towards</returns>
     private GameObject pointToGoTowards()
     {
         // Create a new point with a trigger collider
@@ -73,7 +82,7 @@ public class WanderState : State
         point.transform.position = randomPoint;
         CircleCollider2D cirCollider = point.AddComponent<CircleCollider2D>(); // Add a collider to the point
         cirCollider.isTrigger = true; // Set collider as trigger
-        aiPath.destination = randomPoint; // Set the new destination for the AI
+        //aiPath.destination = randomPoint; // Set the new destination for the AI
 
         Debug.Log($"AI destination set to: {randomPoint}");
         point.tag = "Destination";
@@ -81,6 +90,10 @@ public class WanderState : State
         return point; // Return the new GameObject (destination point)
     }
 
+    /// <summary>
+    /// Picks a random spot on the map in order for our point 
+    /// </summary>
+    /// <returns>a random spot the pointToGoTowards object can use to set it's position</returns>
     private Vector3 PickRandomPoint()
     {
         Vector3 randomPoint = new Vector3(Random.Range(0, grid.width), Random.Range(0, grid.depth)); // Random point in grid
@@ -119,9 +132,12 @@ public class WanderState : State
             return PickRandomPoint(); // Retry if the point is invalid
         }
 
-
     }
 
+    /// <summary>
+    /// Checks if the AI is stuck in place based on the where and when it moves last, and starts a timer if it's stuck
+    /// </summary>
+    /// <returns> if our enemy has been stuck there too long based on our timer</returns>
     private bool IsAIStuck()
     {
         // Calculate how much time has passed since the last movement
@@ -139,7 +155,9 @@ public class WanderState : State
         return timeSinceLastMovement >= stuckTimeThreshold;
     }
 
-    // Teleport the AI to a random position on the map
+    /// <summary>
+    /// Teleport the AI to a random position on the map
+    /// </summary>
     private void TeleportToRandomLocation()
     {
         Vector3 randomPoint = PickRandomPoint(); // Pick a random valid point

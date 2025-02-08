@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class FOV : MonoBehaviour
 {
+    //TODO:
+    //FOV keeps following with the rotation of the rigidbody, should we make it its own object?
+
     [SerializeField] private float fov = 90f; // Field of view in degrees
     [SerializeField] private float distance = 5f; // Max raycast distance
     [SerializeField] private int rayCount = 10; // Number of FOV rays
