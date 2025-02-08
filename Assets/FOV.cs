@@ -16,6 +16,7 @@ public class FOV : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>(); // Get the Rigidbody2D
+        player = GameObject.FindGameObjectWithTag("Player");
     }
 
     void Update()
