@@ -44,10 +44,10 @@ public class Pursuit : State
         aiDestinationSetter.target = playerTransform;
 
         Debug.Log(Vector2.Distance(enemyTransform.position, playerTransform.position));
-        if (Vector2.Distance(enemyTransform.position, playerTransform.position) >= fov.distance)
+        /* if (Vector2.Distance(enemyTransform.position, playerTransform.position) >= fov.distance)
         {
             fov.canSeePlayer = false;
-        }
+        } */
 
         if (!fov.canSeePlayer)
         {
