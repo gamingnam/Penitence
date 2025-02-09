@@ -26,8 +26,10 @@ public class IdleState : State
 
     void Start()
     {
-        enemy = GameObject.FindGameObjectWithTag("StatciEnemy");
-        enemyTransform = enemy.transform; 
+        grid = AstarPath.active.data.gridGraph;
+        aiDestinationSetter = enemy.GetComponent<AIDestinationSetter>();
+        aiPath = enemy.GetComponent<AIPath>();
+        pointToGoTowards(); 
     }
 
     public override State RunCurrentState()
