@@ -26,7 +26,7 @@ public class FOV : MonoBehaviour
 
     void Update()
     {
-         if (rb == null || player == null) return;
+        if (rb == null || player == null) return;
 
         // Get the enemy's current facing angle
         float facingAngle = transform.eulerAngles.z;
@@ -34,6 +34,8 @@ public class FOV : MonoBehaviour
         // Calculate the starting angle for the FOV
         float angleStep = fov / (rayCount - 1);
         float startAngle = facingAngle - (fov / 2);
+        
+        canSeePlayer = false;
 
         // Cast the FOV rays
         for (int i = 0; i < rayCount; i++)
@@ -50,6 +52,7 @@ public class FOV : MonoBehaviour
             {
                 canSeePlayer = true;
                 Debug.Log("Player detected in FOV!");
+                break;
             }
 
 
@@ -72,6 +75,7 @@ public class FOV : MonoBehaviour
             {
                 canSeePlayer = true;
                 Debug.Log("Player detected near enemy!");
+                break;
             }
         }
     }
