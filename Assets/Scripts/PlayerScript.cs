@@ -73,6 +73,7 @@ public class PlayerScript : MonoBehaviour,IDamageable
         ShootHandler();
         InventoryHandler();
         RespawnParse();
+        Respawn();
     }
     private void LateUpdate()
     {
@@ -170,11 +171,13 @@ public class PlayerScript : MonoBehaviour,IDamageable
 		}
     }
 
+    //Down the line change this an IEnumator where it waits for the Taste/Death Animation to finish before Respawning
     void Respawn()
     {
         if(health <= 0)
         {
             this.transform.position = spawner.transform.position;
+            health = 100;
         }
     }
 
@@ -191,5 +194,13 @@ public class PlayerScript : MonoBehaviour,IDamageable
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(this.transform.position, spawnerRadius);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy")) 
+        {
+            ReceiveDamage(5f);
+        }
     }
 }
