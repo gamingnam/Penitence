@@ -23,7 +23,6 @@ public class IdleState : State
     [SerializeField] private LayerMask playerMask;
     [SerializeField] private LayerMask obstacleLayer;
     #endregion
-
     void Start()
     {
         grid = AstarPath.active.data.gridGraph;

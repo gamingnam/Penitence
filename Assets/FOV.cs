@@ -24,7 +24,8 @@ public class FOV : MonoBehaviour
 
     void Update()
     {
-        if (rb == null || player == null) return;
+
+         if (rb == null || player == null) return;
 
         // Get the enemy's current facing angle
         float facingAngle = transform.eulerAngles.z + 90f;
