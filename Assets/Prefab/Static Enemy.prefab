@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 8696887321838007897}
   m_Layer: 0
   m_Name: Static Enemy
-  m_TagString: Untagged
+  m_TagString: StaticEnemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -198,7 +198,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1332969975087771261}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -222,7 +222,7 @@ MonoBehaviour:
   enemy: {fileID: 1119949170364404829}
   enemyTransform: {fileID: 5270326427875205969}
   playerRadius: 3
-  rayCount: 64
+  rayCount: 128
   playerMask:
     serializedVersion: 2
     m_Bits: 128
