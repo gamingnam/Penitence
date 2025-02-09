@@ -34,6 +34,7 @@ public class WanderState : State
     [SerializeField] private float stuckTimeThreshold = 3.0f; // Time threshold before considering the AI stuck (in seconds)
     [SerializeField] private float timeSinceLastMovement = 0.0f; // Timer to track how long since the AI last moved
     [SerializeField] private Vector3 lastKnownPosition;
+    public FOV fov;
     #endregion
 
     #region Animation
@@ -46,6 +47,7 @@ public class WanderState : State
     private void Start()
     {
         enemy = GameObject.FindGameObjectWithTag("Enemy");
+        fov = enemy.GetComponent<FOV>();
         enemyTransform = enemy.transform;
         grid = AstarPath.active.data.gridGraph;
         aiDestinationSetter = enemy.GetComponent<AIDestinationSetter>();
@@ -64,7 +66,10 @@ public class WanderState : State
             Debug.Log("AI is stuck, teleporting to a random location!");
             TeleportToRandomLocation(); // Teleport AI to a random position
         }
-
+        if (fov.canSeePlayer)
+        {
+            return pursuitState;
+        }
         return this;
     }
 
