@@ -23,13 +23,9 @@ public class IdleState : State
     [SerializeField] private LayerMask playerMask;
     [SerializeField] private LayerMask obstacleLayer;
     #endregion
-
     void Start()
     {
-        grid = AstarPath.active.data.gridGraph;
-        aiDestinationSetter = enemy.GetComponent<AIDestinationSetter>();
-        aiPath = enemy.GetComponent<AIPath>();
-        pointToGoTowards(); 
+      
     }
 
     public override State RunCurrentState()

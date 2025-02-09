@@ -8,7 +8,7 @@ public class FOV : MonoBehaviour
     //FOV keeps following with the rotation of the rigidbody, should we make it its own object?
 
     [SerializeField] private float fov = 90f; // Field of view in degrees
-    [SerializeField] private float distance = 5f; // Max raycast distance
+    public float distance = 5f; // Max raycast distance
     [SerializeField] private int rayCount = 10; // Number of FOV rays
     [SerializeField] private int smallerRaysCount = 12; // Rays around the enemy
     [SerializeField] private float smallerRayDistance = 2f; // Distance for smaller rays
@@ -16,6 +16,8 @@ public class FOV : MonoBehaviour
     private Rigidbody2D rb;
     [SerializeField] private GameObject player;
     [SerializeField] private LayerMask layerMask;
+    public bool canSeePlayer = false;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>(); // Get the Rigidbody2D
@@ -24,10 +26,10 @@ public class FOV : MonoBehaviour
 
     void Update()
     {
-        if (rb == null || player == null) return;
+         if (rb == null || player == null) return;
 
         // Get the enemy's current facing angle
-        float facingAngle = transform.eulerAngles.z + 90f;
+        float facingAngle = transform.eulerAngles.z;
 
         // Calculate the starting angle for the FOV
         float angleStep = fov / (rayCount - 1);
@@ -46,10 +48,13 @@ public class FOV : MonoBehaviour
             // If the ray hits the player
             if (hit.collider != null && hit.collider.gameObject == player)
             {
+                canSeePlayer = true;
                 Debug.Log("Player detected in FOV!");
             }
-        }
 
+
+        }
+        
         // Cast smaller rays around the enemy
         float angleIncrement = 360f / smallerRaysCount;
 
@@ -65,6 +70,7 @@ public class FOV : MonoBehaviour
             // If the ray hits the player
             if (smallHit.collider != null && smallHit.collider.gameObject == player)
             {
+                canSeePlayer = true;
                 Debug.Log("Player detected near enemy!");
             }
         }

@@ -22,6 +22,7 @@ public class Pursuit : State
     #region States to Transition to
     [Header("States to Transition to")]
     [SerializeField] private State wanderState;
+    public FOV fov;
     #endregion
 
     #region Ending Pursuit Values
@@ -33,7 +34,7 @@ public class Pursuit : State
 
     private void Start()
     {
-
+        fov = enemy.GetComponent<FOV>();
         aiDestinationSetter = enemy.GetComponent<AIDestinationSetter>();
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         enemyTransform = enemy.transform;
@@ -43,21 +44,17 @@ public class Pursuit : State
         aiDestinationSetter.target = playerTransform;
 
         Debug.Log(Vector2.Distance(enemyTransform.position, playerTransform.position));
-
-        if (Vector2.Distance(enemyTransform.position, playerTransform.position) >= pursitDistance)
+        if (Vector2.Distance(enemyTransform.position, playerTransform.position) >= fov.distance)
         {
-            endPursitTimer += Time.deltaTime;
-        }
-        else
-        {
-            endPursitTimer = 0;
+            fov.canSeePlayer = false;
         }
 
-        if (endPursitTimer > endPursitTimerThreshold)
+        if (!fov.canSeePlayer)
         {
-            endPursitTimer = 0;
+            aiDestinationSetter.target = null;
             return wanderState;
         }
+
         return this;
     }
 
