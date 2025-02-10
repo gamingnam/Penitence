@@ -12,6 +12,7 @@ public class Pursuit : State
     [SerializeField] private GameObject enemy;
     [SerializeField] private Transform enemyTransform;
     [SerializeField] private Transform playerTransform;
+    [SerializeField] private FOV fov;
     #endregion
 
     #region AStarGrid and Scripts
@@ -22,7 +23,7 @@ public class Pursuit : State
     #region States to Transition to
     [Header("States to Transition to")]
     [SerializeField] private State wanderState;
-    public FOV fov;
+
     #endregion
 
     #region Ending Pursuit Values
@@ -43,12 +44,6 @@ public class Pursuit : State
     {
         aiDestinationSetter.target = playerTransform;
 
-        Debug.Log(Vector2.Distance(enemyTransform.position, playerTransform.position));
-        /* if (Vector2.Distance(enemyTransform.position, playerTransform.position) >= fov.distance)
-        {
-            fov.canSeePlayer = false;
-        } */
-
         if (!fov.canSeePlayer)
         {
             aiDestinationSetter.target = null;
@@ -56,15 +51,5 @@ public class Pursuit : State
         }
 
         return this;
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (showGizmos) 
-        {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawLine(enemyTransform.position, playerTransform.position);
-        }
-       
     }
 }

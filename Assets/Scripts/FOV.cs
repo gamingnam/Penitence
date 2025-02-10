@@ -1,17 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using Pathfinding;
 using UnityEngine;
 
 public class FOV : MonoBehaviour
 {
-    //TODO:
-    //FOV keeps following with the rotation of the rigidbody, should we make it its own object?
+    //TODO: Add Knockback to player
+    //TODO: Add Spawner 
 
     [SerializeField] private float fov = 90f; // Field of view in degrees
     public float distance = 5f; // Max raycast distance
     [SerializeField] private int rayCount = 10; // Number of FOV rays
     [SerializeField] private int smallerRaysCount = 12; // Rays around the enemy
     [SerializeField] private float smallerRayDistance = 2f; // Distance for smaller rays
+    [SerializeField] private AIPath aiPath;
 
     private Rigidbody2D rb;
     [SerializeField] private GameObject player;
@@ -22,14 +24,27 @@ public class FOV : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>(); // Get the Rigidbody2D
         player = GameObject.FindGameObjectWithTag("Player");
+        aiPath = GetComponent<AIPath>();
     }
 
     void Update()
     {
         if (rb == null || player == null) return;
 
-        // Get the enemy's current facing angle
-        float facingAngle = transform.eulerAngles.z;
+        float facingAngle;
+        if (aiPath != null)
+        {
+            // Get direction towards the AI's steering target (next path point)
+            Vector2 nextWaypointDirection = ((Vector2)aiPath.steeringTarget - (Vector2)transform.position).normalized;
+
+            // Convert direction to angle
+            facingAngle = Mathf.Atan2(nextWaypointDirection.y, nextWaypointDirection.x) * Mathf.Rad2Deg;
+        }
+        else
+        {
+            // Default to current rotation if AIPath is missing
+            facingAngle = transform.eulerAngles.z;
+        }
 
         // Calculate the starting angle for the FOV
         float angleStep = fov / (rayCount - 1);

@@ -25,7 +25,7 @@ public class Enemy : MonoBehaviour,IDamageable
 
     public void Update()
     {
-        RotateToPlayer(GameObject.Find("Player"));
+        RotateToPlayer(GameObject.FindGameObjectWithTag("Player"));
         if(_currentHealth <= 0)
         {
             Destroy(gameObject);
