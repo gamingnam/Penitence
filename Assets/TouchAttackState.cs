@@ -64,6 +64,6 @@ public class TouchAttackState : State
     private void Lunge() 
     {
         Vector2 directionToPlayer = ((Vector2)playerTransform.position - rb.position).normalized;
-        rb.AddForce(directionToPlayer * (2), ForceMode2D.Impulse);
+        rb.AddForce(directionToPlayer * 2, ForceMode2D.Impulse);
     }
 }

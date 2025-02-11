@@ -191,6 +191,11 @@ public class PlayerScript : MonoBehaviour,IDamageable
         UpdateHealth(updatedHealth > 0 ? updatedHealth : 0);
    }
 
+   void ApplyKnockBack(Vector2 direction, float force)
+    {
+        rb.AddForce(direction * force, ForceMode2D.Impulse);
+    }
+    
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(this.transform.position, spawnerRadius);
@@ -201,6 +206,16 @@ public class PlayerScript : MonoBehaviour,IDamageable
         if (collision.gameObject.CompareTag("Enemy")) 
         {
             ReceiveDamage(5f);
+            
         }
+        
+        /* if(other.gameObject.tag == "Player")
+        {
+            velocityOfPlayer = other.gameObject.GetComponent<PlayerMovementScript>().veloctiyX;
+            Vector2 directionOfPlayer = other.gameObject.GetComponent<PlayerMovementScript>().input;
+            ApplyKnockBack(Vector2.right,velocityOfPlayer * 1000);
+            Debug.Log(velocityOfPlayer);
+            
+        }     */
     }
 }
