@@ -52,10 +52,11 @@ public class Pursuit : State
             aiDestinationSetter.target = null;
             return wanderState;
         }
-        else if (Vector2.Distance(playerTransform.position, enemyTransform.position) <= attackRange)
+        else
         {
             return attackState;
         }
+
         return this;
     }
 }
