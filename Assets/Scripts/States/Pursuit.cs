@@ -23,15 +23,18 @@ public class Pursuit : State
     #region States to Transition to
     [Header("States to Transition to")]
     [SerializeField] private State wanderState;
-
+    [SerializeField] private State attackState;
+    [SerializeField] private float attackRange;
     #endregion
-
+    // Not needed, but keeping just in case for futrue testing
+    /*
     #region Ending Pursuit Values
     [Header("Ending Pursuit Values")]
     [SerializeField] private float endPursitTimer;
     [SerializeField] private float endPursitTimerThreshold;
     [SerializeField] private int pursitDistance;
     #endregion
+    */
 
     private void Start()
     {
@@ -49,7 +52,10 @@ public class Pursuit : State
             aiDestinationSetter.target = null;
             return wanderState;
         }
-
+        else if (Vector2.Distance(playerTransform.position, enemyTransform.position) <= attackRange)
+        {
+            return attackState;
+        }
         return this;
     }
 }

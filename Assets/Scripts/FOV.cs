@@ -20,8 +20,13 @@ public class FOV : MonoBehaviour
     [SerializeField] private LayerMask layerMask;
     public bool canSeePlayer = false;
 
+    [SerializeField] private float pursuitSpeed;
+    [SerializeField] private float wanderSpeed;
+    private AILerp aiLerp;
+
     void Start()
     {
+        aiLerp = gameObject.GetComponent<AILerp>();
         rb = GetComponent<Rigidbody2D>(); // Get the Rigidbody2D
         player = GameObject.FindGameObjectWithTag("Player");
         aiPath = GetComponent<AIPath>();
@@ -93,5 +98,16 @@ public class FOV : MonoBehaviour
                 break;
             }
         }
+
+        if (canSeePlayer)
+        {
+            aiLerp.speed = pursuitSpeed;
+        }
+        else
+        {
+            aiLerp.speed = wanderSpeed;
+        }
+
     }
+
 }
