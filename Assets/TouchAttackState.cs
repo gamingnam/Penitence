@@ -23,6 +23,7 @@ public class TouchAttackState : State
     #region States to Transition to
     [Header("States to Transition to")]
     [SerializeField] private State wanderState;
+    [SerializeField] private State pursuitState;
     #endregion
 
     void Start()
@@ -41,11 +42,12 @@ public class TouchAttackState : State
         else 
         {
             StopCoroutine(TouchAttack());
-            return wanderState;
+            return pursuitState;
         }
 
         return this; 
     }
+
 
     private IEnumerator TouchAttack() 
     {
@@ -60,10 +62,10 @@ public class TouchAttackState : State
 
 
     }
-
+    
     private void Lunge() 
     {
         Vector2 directionToPlayer = ((Vector2)playerTransform.position - rb.position).normalized;
-        rb.AddForce(directionToPlayer * 2, ForceMode2D.Impulse);
+        rb.AddForce(directionToPlayer * 3f, ForceMode2D.Impulse);
     }
 }
