@@ -408,7 +408,7 @@ public class ChaseState : State
     {
         if (showGizmos)
         {
-            Gizmos.color = Color.red;
+            
             Gizmos.DrawWireSphere(rb.position, obstacleDetectionRadius);
 
             Gizmos.color = Color.white;

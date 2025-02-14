@@ -16,6 +16,7 @@ public class TouchAttackState : State
     [SerializeField] private bool hasTouchAttacked;
     [SerializeField] private float coolDownSeconds;
     [SerializeField] private float coolLungeSecond;
+    [SerializeField] private float lungeStrength;
     [SerializeField] private PlayerScript ps;
     #endregion
 
@@ -23,6 +24,7 @@ public class TouchAttackState : State
     [Header("AStarGrid and Scripts")]
     [SerializeField] private AIDestinationSetter aiDestinationSetter;
     [SerializeField] private AIPath aiPath;
+    [SerializeField] private AILerp aiLerp;
     #endregion
 
     #region States to Transition to
@@ -32,11 +34,14 @@ public class TouchAttackState : State
 
     void Start()
     {
+        
         aiDestinationSetter = enemy.GetComponent<AIDestinationSetter>();
         aiPath = enemy.GetComponent<AIPath>();
+        aiLerp = enemy.GetComponent<AILerp>();
         player = GameObject.FindGameObjectWithTag("Player");
         playerTransform = player.transform;
         ps = player.GetComponent<PlayerScript>();
+        rb.AddForce(Vector2.zero, ForceMode2D.Impulse);
     }
 
     public override State RunCurrentState()
@@ -50,9 +55,9 @@ public class TouchAttackState : State
         else 
         {
             StopCoroutine(TouchAttack());
-            rb.AddForce(Vector2.zero,ForceMode2D.Impulse);
             aiDestinationSetter.enabled = true;
             aiPath.enabled = true;
+            hasTouchAttacked = false;
             return pursuitState;
         }
 
@@ -62,15 +67,19 @@ public class TouchAttackState : State
 
     private IEnumerator TouchAttack() 
     {
-        //rb.AddForce(Vector2.zero, ForceMode2D.Impulse);
+        
         Lunge();
+        rb.AddForce(Vector2.zero,ForceMode2D.Impulse);
         yield return new WaitForSeconds(coolDownSeconds);
         hasTouchAttacked = true;
     }
     
+    
     private void Lunge() 
     {
         Vector2 directionToPlayer = ((Vector2)ps.droplet.transform.position - rb.position).normalized;
-        rb.AddForce(directionToPlayer * 1.5f, ForceMode2D.Impulse);
+        rb.AddForce(directionToPlayer * lungeStrength, ForceMode2D.Impulse);
+        Debug.Log("I AM LUNGING!");
     }
+    
 }
