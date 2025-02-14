@@ -46,16 +46,24 @@ public class Pursuit : State
     public override State RunCurrentState()
     {
         aiDestinationSetter.target = playerTransform;
+        Debug.Log(Vector2.Distance(enemyTransform.position,playerTransform.position));
 
         if (!fov.canSeePlayer)
         {
             aiDestinationSetter.target = null;
             return wanderState;
         }
-        else if (Vector2.Distance(playerTransform.position, enemyTransform.position) <= attackRange)
+        else if(fov.canSeePlayer && Vector2.Distance(enemyTransform.position,playerTransform.position) >= fov.distance - attackRange) 
         {
             return attackState;
         }
+
         return this;
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        Debug.DrawLine(enemyTransform.position,playerTransform.position);
     }
 }
