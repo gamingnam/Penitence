@@ -26,7 +26,7 @@ public class Pursuit : State
     [Header("States to Transition to")]
     [SerializeField] private State wanderState;
     [SerializeField] private State attackState;
-    [SerializeField] public float attackRange;
+    [SerializeField] private float attackRange;
     #endregion
     // Not needed, but keeping just in case for futrue testing
     /*
@@ -40,21 +40,12 @@ public class Pursuit : State
 
     private void Start()
     {
-        //aiLerp = enemy.GetComponent<AILerp>();
         fov = enemy.GetComponent<FOV>();
         aiDestinationSetter = enemy.GetComponent<AIDestinationSetter>();
         aiLerp = enemy.GetComponent<AILerp>();
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         enemyTransform = enemy.transform;
     }
-
-    /*
-    void Update()
-    {
-        aiLerp.speed = pursuitSpeed;
-    }
-    */
-
     public override State RunCurrentState()
     {
         aiLerp.speed = pursuitSpeed;
