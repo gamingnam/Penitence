@@ -11,7 +11,6 @@ public class DialogueScript : MonoBehaviour
     private Image img;
     public string fullText;
     private string curText = "";
-    public float delay = 0.01f;
     public AudioClip textSound;
     private bool isTextPlaying;
 
@@ -27,28 +26,32 @@ public class DialogueScript : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.M))
         {
-            if (!isTextPlaying)
-            {
-                StartCoroutine(DisplayText());
-                isTextPlaying = true;
-            }
-            else
-            {
-                StopCoroutine(DisplayText());
-                isTextPlaying = false;
-            }
+            dialogue(fullText,0.01f);
         }
     }
-    IEnumerator DisplayText()
+    public void dialogue(string text,float delay) // throwaway function or rename this shit PLEASE
+    {
+        if (!isTextPlaying)
+        {
+            StartCoroutine(DisplayText(text, delay));
+            isTextPlaying = true;
+        }
+        else
+        {
+            StopCoroutine(DisplayText(text, delay));
+            isTextPlaying = false;
+        }
+    }
+    public IEnumerator DisplayText(string text,float delay)
     {
         for (int i = 0; i < fullText.Length + 1; i++)
         {
-            curText = fullText.Substring(0, i);
+            curText = text.Substring(0, i);
             textDisplay.text = curText;
             yield return new WaitForSeconds(delay);
         }
     }
-    IEnumerator MoveFromTo(Vector3 from, Vector3 to, float speed, RectTransform transform)
+    private IEnumerator MoveFromTo(Vector3 from, Vector3 to, float speed, RectTransform transform)
     {
         float t = 0f;
 
