@@ -16,7 +16,7 @@ public class TouchAttackState : State
     [SerializeField] private bool hasTouchAttacked;
     [SerializeField] private float coolDownSeconds;
     [SerializeField] private float coolLungeSecond;
-    [SerializeField] private float lungeStrength;
+    [SerializeField] private float touchAttackSpeed;
     [SerializeField] private PlayerScript ps;
     #endregion
 
@@ -41,11 +41,12 @@ public class TouchAttackState : State
         player = GameObject.FindGameObjectWithTag("Player");
         playerTransform = player.transform;
         ps = player.GetComponent<PlayerScript>();
-        rb.AddForce(Vector2.zero, ForceMode2D.Impulse);
+        //rb.AddForce(Vector2.zero, ForceMode2D.Impulse);
     }
 
     public override State RunCurrentState()
     {
+        aiLerp.speed = touchAttackSpeed;
         if (!hasTouchAttacked)
         {
             aiDestinationSetter.enabled = false;
@@ -69,7 +70,7 @@ public class TouchAttackState : State
     {
         
         Lunge();
-        rb.AddForce(Vector2.zero,ForceMode2D.Impulse);
+        //rb.AddForce(Vector2.zero,ForceMode2D.Impulse);
         yield return new WaitForSeconds(coolDownSeconds);
         hasTouchAttacked = true;
     }
@@ -78,8 +79,9 @@ public class TouchAttackState : State
     private void Lunge() 
     {
         Vector2 directionToPlayer = ((Vector2)ps.droplet.transform.position - rb.position).normalized;
-        rb.AddForce(directionToPlayer * lungeStrength, ForceMode2D.Impulse);
-        Debug.Log("I AM LUNGING!");
+        //rb.AddForce(directionToPlayer * lungeStrength, ForceMode2D.Impulse);
+        rb.velocity = directionToPlayer * aiLerp.speed;
+        Debug.Log("I AM EDGING!");
     }
     
 }
