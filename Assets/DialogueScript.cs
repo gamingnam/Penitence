@@ -11,7 +11,7 @@ public class DialogueScript : MonoBehaviour
     private Image img;
     public string fullText;
     private string curText = "";
-    public float delay = 0.05f;
+    public float delay = 0.01f;
     public AudioClip textSound;
     private bool isTextPlaying;
 

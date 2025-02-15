@@ -7,7 +7,7 @@ using UnityEngine;
 public class PlayerScript : MonoBehaviour
 {
     public int ammo;
-    private float health;
+    public float health;
 
     [SerializeField] public InventoryManager inventory;
 
@@ -49,6 +49,7 @@ public class PlayerScript : MonoBehaviour
         ammo = 7;
         _cam = Camera.main;
         muzzleflash = muzzle.GetComponent<UnityEngine.Rendering.Universal.Light2D>();
+        health = 100f;
 
     }
 
