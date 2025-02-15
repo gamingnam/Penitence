@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -44,6 +46,7 @@ public class PlayerScript : MonoBehaviour,IDamageable
     [SerializeField] private GameObject spawner;
     [SerializeField] private LayerMask spawnerMask;
     [SerializeField] private int spawnerRadius;
+    [SerializeField] public GameObject droplet;
     
     public UnityEngine.Rendering.Universal.Light2D muzzleflash;
 
@@ -53,6 +56,7 @@ public class PlayerScript : MonoBehaviour,IDamageable
         rb = GetComponent<Rigidbody2D>();
         ammo = 7;
         _cam = Camera.main;
+        InstantiateDroplet(this.transform.position);
         muzzleflash = muzzle.GetComponent<UnityEngine.Rendering.Universal.Light2D>();
 
     }
@@ -70,9 +74,12 @@ public class PlayerScript : MonoBehaviour,IDamageable
         lookAngle = Mathf.Atan2(mouseWorldPosition.y - transform.position.y, mouseWorldPosition.x - transform.position.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.AngleAxis(lookAngle - 90f, Vector3.forward);
 
+        
         ShootHandler();
         InventoryHandler();
         RespawnParse();
+        Respawn();
+        InstantiateDroplet(this.transform.position);
     }
     private void LateUpdate()
     {
@@ -170,11 +177,13 @@ public class PlayerScript : MonoBehaviour,IDamageable
 		}
     }
 
+    //Down the line change this an IEnumator where it waits for the Taste/Death Animation to finish before Respawning
     void Respawn()
     {
         if(health <= 0)
         {
             this.transform.position = spawner.transform.position;
+            health = 100;
         }
     }
 
@@ -188,8 +197,38 @@ public class PlayerScript : MonoBehaviour,IDamageable
         UpdateHealth(updatedHealth > 0 ? updatedHealth : 0);
    }
 
+   void ApplyKnockBack(Vector2 direction, float force)
+    {
+        rb.AddForce(direction * force, ForceMode2D.Impulse);
+    }
+
+    private GameObject InstantiateDroplet(Vector2 position)
+    {
+        if (droplet != null)
+        {
+            Destroy(droplet);
+        }
+        droplet = new GameObject("Droplet");
+        droplet.transform.position = position;
+        CircleCollider2D cirCollider = droplet.AddComponent<CircleCollider2D>(); // Add a collider to the point
+        cirCollider.isTrigger = true; // Set collider as trigger
+        droplet.tag = "Droplet";
+        return droplet;
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.DrawWireSphere(this.transform.position, spawnerRadius);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy")) 
+        {
+            ReceiveDamage(5f);
+            /*Vector2 directionToPlayer = ((Vector2).transform.position - rb.position).normalized;
+            rb.AddForce(-directionToPlayer * 30f,ForceMode2D.Impulse);*/
+            
+        }
     }
 }

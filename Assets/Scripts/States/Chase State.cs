@@ -55,11 +55,11 @@ public class ChaseState : State
     private Queue<GameObject> droplets = new Queue<GameObject>(); // Queue of GameObjects (droplets)
     #endregion
 
-    #region Stuck Detection
+    /* #region Stuck Detection
     [Header("Stuck Detection")]
     [SerializeField] private float stuckThresholdTime = 0.1f;  // Time to consider the enemy "stuck"
     private float stuckTimer = 0f;
-    #endregion
+    #endregion */
 
     public void Start()
     {
@@ -408,7 +408,7 @@ public class ChaseState : State
     {
         if (showGizmos)
         {
-            Gizmos.color = Color.red;
+            
             Gizmos.DrawWireSphere(rb.position, obstacleDetectionRadius);
 
             Gizmos.color = Color.white;
