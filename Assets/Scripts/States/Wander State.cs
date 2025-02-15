@@ -21,6 +21,7 @@ public class WanderState : State
     [Header("AStarGrid and Scripts")]
     [SerializeField] private AIDestinationSetter aiDestinationSetter;
     [SerializeField] private AIPath aiPath;
+    [SerializeField] private AILerp aiLerp;
     private GridGraph grid;
     #endregion
 
@@ -31,9 +32,11 @@ public class WanderState : State
     private readonly int maxRetries;
     [SerializeField][Range(1f, 40f)] private float minDistanceBetweenPoints;
     [SerializeField][Range(0.5f, 2.0f)] private float randomDistanceFactor = 1.0f;
+    [SerializeField] private float wanderSpeed;
     [SerializeField] private float stuckTimeThreshold = 3.0f; // Time threshold before considering the AI stuck (in seconds)
     [SerializeField] private float timeSinceLastMovement = 0.0f; // Timer to track how long since the AI last moved
     [SerializeField] private Vector3 lastKnownPosition;
+
     public FOV fov;
     #endregion
 
@@ -52,10 +55,12 @@ public class WanderState : State
         grid = AstarPath.active.data.gridGraph;
         aiDestinationSetter = enemy.GetComponent<AIDestinationSetter>();
         aiPath = enemy.GetComponent<AIPath>();
+        aiLerp = enemy.GetComponent<AILerp>();
         aiDestinationSetter.target = pointToGoTowards().transform;
     }
     public override State RunCurrentState()
     {
+        aiLerp.speed = wanderSpeed;
         if (!aiPath.pathPending && aiPath.reachedDestination)
         {
             aiDestinationSetter.target = pointToGoTowards().transform;

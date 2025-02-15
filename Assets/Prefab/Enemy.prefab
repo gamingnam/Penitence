@@ -49,10 +49,12 @@ MonoBehaviour:
   enemyTransform: {fileID: 3265527113602512497}
   playerTransform: {fileID: 0}
   fov: {fileID: 0}
+  aiLerp: {fileID: 0}
+  pursuitSpeed: 3
   aiDestinationSetter: {fileID: 0}
   wanderState: {fileID: 5301209354671859258}
   attackState: {fileID: 6584796077764018492}
-  attackRange: 3
+  attackRange: 2
 --- !u!1 &4278319301291308360
 GameObject:
   m_ObjectHideFlags: 0
@@ -290,7 +292,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fov: 90
-  distance: 10
+  distance: 6
   rayCount: 135
   smallerRaysCount: 135
   smallerRayDistance: 2
@@ -300,8 +302,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 384
   canSeePlayer: 0
-  pursuitSpeed: 2
-  wanderSpeed: 1.5
 --- !u!114 &8681762047695353524
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -406,7 +406,7 @@ MonoBehaviour:
     maximumInterval: 2
     visualizeSensitivity: 0
   canMove: 1
-  speed: 3
+  speed: 0
   orientation: 1
   enableRotation: 1
   rotationSpeed: 10
@@ -464,7 +464,7 @@ MonoBehaviour:
   - {x: 0.5, y: -0.5, z: 0}
   m_ShapePathHash: 0
   m_Mesh: {fileID: 0}
-  m_InstanceId: -3480
+  m_InstanceId: -1628
   m_LocalBounds:
     m_Center: {x: 0, y: 0.000000059604645, z: 0}
     m_Extent: {x: 0.5, y: 0.50000006, z: 0}
@@ -518,10 +518,12 @@ MonoBehaviour:
   player: {fileID: 0}
   hasTouchAttacked: 0
   coolDownSeconds: 2
-  coolLungeSecond: 0.25
+  coolLungeSecond: 0.02
+  touchAttackSpeed: 6
   ps: {fileID: 0}
   aiDestinationSetter: {fileID: 0}
   aiPath: {fileID: 0}
+  aiLerp: {fileID: 0}
   pursuitState: {fileID: 6020431578925280047}
 --- !u!1 &6949744596432505488
 GameObject:
@@ -573,9 +575,11 @@ MonoBehaviour:
   pursuitState: {fileID: 6020431578925280047}
   aiDestinationSetter: {fileID: 0}
   aiPath: {fileID: 0}
+  aiLerp: {fileID: 0}
   point: {fileID: 0}
   minDistanceBetweenPoints: 35
   randomDistanceFactor: 1.5
+  wanderSpeed: 1
   stuckTimeThreshold: 3
   timeSinceLastMovement: 0
   lastKnownPosition: {x: 0, y: 0, z: 0}

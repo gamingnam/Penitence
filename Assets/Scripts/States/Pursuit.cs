@@ -13,6 +13,8 @@ public class Pursuit : State
     [SerializeField] private Transform enemyTransform;
     [SerializeField] private Transform playerTransform;
     [SerializeField] private FOV fov;
+    [SerializeField] private AILerp aiLerp;
+    [SerializeField] private float pursuitSpeed;
     #endregion
 
     #region AStarGrid and Scripts
@@ -40,11 +42,13 @@ public class Pursuit : State
     {
         fov = enemy.GetComponent<FOV>();
         aiDestinationSetter = enemy.GetComponent<AIDestinationSetter>();
+        aiLerp = enemy.GetComponent<AILerp>();
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         enemyTransform = enemy.transform;
     }
     public override State RunCurrentState()
     {
+        aiLerp.speed = pursuitSpeed;
         aiDestinationSetter.target = playerTransform;
         Debug.Log(Vector2.Distance(enemyTransform.position,playerTransform.position));
 

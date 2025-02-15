@@ -19,9 +19,6 @@ public class FOV : MonoBehaviour
     [SerializeField] private GameObject player;
     [SerializeField] private LayerMask layerMask;
     public bool canSeePlayer = false;
-
-    [SerializeField] private float pursuitSpeed;
-    [SerializeField] private float wanderSpeed;
     private AILerp aiLerp;
 
     void Start()
@@ -98,16 +95,6 @@ public class FOV : MonoBehaviour
                 break;
             }
         }
-
-        if (canSeePlayer)
-        {
-            aiLerp.speed = pursuitSpeed;
-        }
-        else
-        {
-            aiLerp.speed = wanderSpeed;
-        }
-
     }
 
 }
