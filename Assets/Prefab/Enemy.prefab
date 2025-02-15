@@ -49,12 +49,12 @@ MonoBehaviour:
   enemyTransform: {fileID: 3265527113602512497}
   playerTransform: {fileID: 0}
   fov: {fileID: 0}
-  aiLerp: {fileID: 0}
-  pursuitSpeed: 3
+  aiLerp: {fileID: 5583024519389305651}
+  pursuitSpeed: 2
   aiDestinationSetter: {fileID: 0}
   wanderState: {fileID: 5301209354671859258}
   attackState: {fileID: 6584796077764018492}
-  attackRange: 2
+  attackRange: 1
 --- !u!1 &4278319301291308360
 GameObject:
   m_ObjectHideFlags: 0
@@ -292,7 +292,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fov: 90
-  distance: 6
+  distance: 8
   rayCount: 135
   smallerRaysCount: 135
   smallerRayDistance: 2
@@ -360,7 +360,7 @@ MonoBehaviour:
   radius: 0.5
   height: 2
   canMove: 1
-  maxSpeed: 5
+  maxSpeed: 3
   gravity: {x: NaN, y: NaN, z: NaN}
   groundMask:
     serializedVersion: 2
@@ -406,7 +406,7 @@ MonoBehaviour:
     maximumInterval: 2
     visualizeSensitivity: 0
   canMove: 1
-  speed: 0
+  speed: 2
   orientation: 1
   enableRotation: 1
   rotationSpeed: 10
@@ -464,7 +464,7 @@ MonoBehaviour:
   - {x: 0.5, y: -0.5, z: 0}
   m_ShapePathHash: 0
   m_Mesh: {fileID: 0}
-  m_InstanceId: -1628
+  m_InstanceId: -43060
   m_LocalBounds:
     m_Center: {x: 0, y: 0.000000059604645, z: 0}
     m_Extent: {x: 0.5, y: 0.50000006, z: 0}
@@ -569,17 +569,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8881f72235e8ba44ebedff0ccd1cedca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemy: {fileID: 0}
-  enemyTransform: {fileID: 0}
+  enemy: {fileID: 4430453679191176384}
+  enemyTransform: {fileID: 3265527113602512497}
   showGizmos: 1
   pursuitState: {fileID: 6020431578925280047}
   aiDestinationSetter: {fileID: 0}
   aiPath: {fileID: 0}
-  aiLerp: {fileID: 0}
+  aiLerp: {fileID: 5583024519389305651}
   point: {fileID: 0}
   minDistanceBetweenPoints: 35
   randomDistanceFactor: 1.5
-  wanderSpeed: 1
+  wanderSpeed: 1.5
   stuckTimeThreshold: 3
   timeSinceLastMovement: 0
   lastKnownPosition: {x: 0, y: 0, z: 0}
