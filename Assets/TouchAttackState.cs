@@ -32,9 +32,66 @@ public class TouchAttackState : State
     [SerializeField] private State pursuitState;
     #endregion
 
+
+    //Second
+  
+        void Start()
+        {
+            aiDestinationSetter = enemy.GetComponent<AIDestinationSetter>();
+            aiPath = enemy.GetComponent<AIPath>();
+            player = GameObject.FindGameObjectWithTag("Player");
+            ps = player.GetComponent<PlayerScript>();
+        }
+
+        public override State RunCurrentState()
+        {
+            if (!hasTouchAttacked)
+            {
+                StartCoroutine(TouchAttack());
+                //TouchAttack();
+            }
+            else
+            {
+                aiDestinationSetter.enabled = true;
+                aiPath.enabled = true;
+                hasTouchAttacked = false;
+                return pursuitState;
+            }
+
+            return this;
+        }
+
+        private IEnumerator TouchAttack()
+        {
+            Lunge(); // Perform the lunge attack
+
+            yield return new WaitForSeconds(0.5f); // Short pause to let the lunge happen
+
+            yield return new WaitForSeconds(coolDownSeconds); // Additional cooldown before resuming pursuit
+            hasTouchAttacked = true;
+        }
+
+        private void Lunge()
+        {
+            // Stop AI movement completely
+            aiDestinationSetter.enabled = false;
+            aiPath.enabled = false;
+            rb.velocity = Vector2.zero; // Ensure a clean leap forward
+
+            // Calculate direction to the last known droplet position
+            Vector2 directionToPlayer = ((Vector2)ps.droplet.transform.position - rb.position).normalized;
+
+            // Apply a strong impulse force for a single leap
+            rb.AddForce(directionToPlayer * lungeStrength, ForceMode2D.Impulse);
+
+            Debug.Log("LUNGE ATTACK INITIATED!");
+        }
+
+
+    //First
+    /*
     void Start()
     {
-        
         aiDestinationSetter = enemy.GetComponent<AIDestinationSetter>();
         aiPath = enemy.GetComponent<AIPath>();
         aiLerp = enemy.GetComponent<AILerp>();
@@ -43,29 +100,38 @@ public class TouchAttackState : State
         ps = player.GetComponent<PlayerScript>();
         //rb.AddForce(Vector2.zero, ForceMode2D.Impulse);
     }
-
+    */
+    /*
     public override State RunCurrentState()
     {
         aiLerp.speed = touchAttackSpeed;
         if (!hasTouchAttacked)
         {
+            //pursuitState.enabled = false;
             aiDestinationSetter.enabled = false;
             aiPath.enabled = false;
             StartCoroutine(TouchAttack());
+            //TouchAttack();
         }
         else 
         {
-            StopCoroutine(TouchAttack());
             aiDestinationSetter.enabled = true;
             aiPath.enabled = true;
             hasTouchAttacked = false;
             return pursuitState;
-        }
-
-        return this; 
-    }
-    //Lets first make the enemy's speed zero when we start on the attack as to indicate to player that the enemy is doing the attack. Afterwards, we commit to the attack like usual
-
+            /*
+            //TouchAttack();
+            StopCoroutine(TouchAttack());
+            aiDestinationSetter.enabled = true;
+            aiPath.enabled = true;
+            hasTouchAttacked = false;
+            //pursuitState.enabled = true;
+            return pursuitState;
+            */
+    //}
+    //return this; 
+    //}
+    /*
     private IEnumerator TouchAttack() 
     {
         
@@ -74,8 +140,9 @@ public class TouchAttackState : State
         yield return new WaitForSeconds(coolDownSeconds);
         hasTouchAttacked = true;
     }
-    
-    
+    */
+
+    /*
     private void Lunge() 
     {
         Vector2 directionToPlayer = ((Vector2)ps.droplet.transform.position - rb.position).normalized;
@@ -83,5 +150,7 @@ public class TouchAttackState : State
         rb.velocity = directionToPlayer * aiLerp.speed;
         Debug.Log("I AM EDGING!");
     }
-    
+    */
+
+
 }
