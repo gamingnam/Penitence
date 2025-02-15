@@ -58,6 +58,7 @@ public class PlayerScript : MonoBehaviour,IDamageable
         _cam = Camera.main;
         InstantiateDroplet(this.transform.position);
         muzzleflash = muzzle.GetComponent<UnityEngine.Rendering.Universal.Light2D>();
+        health = 100f;
 
     }
 
