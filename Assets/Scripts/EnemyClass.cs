@@ -1,24 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-
-public enum EnemyType
+public class Enemy : MonoBehaviour,IDamageable
 {
-    Type1,
-    Type2,
-    Type3
-}
-public class Enemy : MonoBehaviour
-{
-
     public int MaxHp;
 
     public int EnemyDmg;
 
-    public int Speed;
+    public float _currentHealth;
 
-    public int _currentHealth;
+    public float knockback; 
 
     [SerializeField] private ParticleSystem bloodSpray;
     [SerializeField] private GameObject bloodDrop;
@@ -34,18 +25,18 @@ public class Enemy : MonoBehaviour
 
     public void Update()
     {
-        RotateToPlayer(GameObject.Find("Player"));
+        //RotateToPlayer(GameObject.FindGameObjectWithTag("Player"));
         if(_currentHealth <= 0)
         {
             Destroy(gameObject);
         }
     }
-    public void UpdateHealth(int newHealthValue)
+    public void UpdateHealth(float newHealthValue)
     {
         _currentHealth = newHealthValue;
     }
 
-    public void ReceiveDamage(int damage)
+    public void ReceiveDamage(float damage)
     {
         var updatedHealth = _currentHealth - damage;
         UpdateHealth(updatedHealth > 0 ? updatedHealth : 0);

@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
-public class PlayerScript : MonoBehaviour
+public class PlayerScript : MonoBehaviour,IDamageable
 {
     public int ammo;
     public float health;
@@ -40,6 +42,12 @@ public class PlayerScript : MonoBehaviour
     private SpriteRenderer sr;
 
     public Transform muzzle;
+
+    [SerializeField] private GameObject spawner;
+    [SerializeField] private LayerMask spawnerMask;
+    [SerializeField] private int spawnerRadius;
+    [SerializeField] public GameObject droplet;
+    
     public UnityEngine.Rendering.Universal.Light2D muzzleflash;
 
     // Start is called before the first frame update
@@ -48,6 +56,7 @@ public class PlayerScript : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         ammo = 7;
         _cam = Camera.main;
+        InstantiateDroplet(this.transform.position);
         muzzleflash = muzzle.GetComponent<UnityEngine.Rendering.Universal.Light2D>();
         health = 100f;
 
@@ -66,8 +75,12 @@ public class PlayerScript : MonoBehaviour
         lookAngle = Mathf.Atan2(mouseWorldPosition.y - transform.position.y, mouseWorldPosition.x - transform.position.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.AngleAxis(lookAngle - 90f, Vector3.forward);
 
+        
         ShootHandler();
         InventoryHandler();
+        RespawnParse();
+        Respawn();
+        InstantiateDroplet(this.transform.position);
     }
     private void LateUpdate()
     {
@@ -75,22 +88,23 @@ public class PlayerScript : MonoBehaviour
     }
     void FixedUpdate()
     {
-        rb.velocity = dir * speed*Time.deltaTime;
+        rb.velocity = dir * speed * Time.deltaTime;
     }
 
     private void ShootHandler()
     {
         if (Input.GetButtonDown("Fire1") && InventoryManager.isInventoryOpened == false)
         {
-            if(ammo > 0) {
+            if (ammo > 0)
+            {
                 StartCoroutine(Shake());
                 muzzleflash.intensity = 50f;
                 AudioSource.PlayClipAtPoint(gunShot, transform.position, 1f);
-                RaycastHit2D hit = Physics2D.Raycast(firePoint.position, (Vector2)mouseWorldPosition -  (Vector2)firePoint.position);
+                RaycastHit2D hit = Physics2D.Raycast(firePoint.position, (Vector2)mouseWorldPosition - (Vector2)firePoint.position);
                 if (hit)
                 {
                     Debug.Log(hit.collider.gameObject.name);
-                    if(hit.collider.gameObject.tag == "Enemy")
+                    if (hit.collider.gameObject.tag == "Enemy")
                     {
                         hit.collider.gameObject.GetComponent<Enemy>().ReceiveDamage(30);
                     }
@@ -116,10 +130,10 @@ public class PlayerScript : MonoBehaviour
     private void CameraHandler()
     {
         float magnitude = 2f;
-        float xMidpoint = Mathf.Clamp((mouseWorldPosition.x - transform.position.x)/2,-magnitude,magnitude);
-        float yMidpoint = Mathf.Clamp((mouseWorldPosition.y - transform.position.y) / 2, -magnitude,magnitude);
+        float xMidpoint = Mathf.Clamp((mouseWorldPosition.x - transform.position.x) / 2, -magnitude, magnitude);
+        float yMidpoint = Mathf.Clamp((mouseWorldPosition.y - transform.position.y) / 2, -magnitude, magnitude);
 
-        _cam.transform.position = Vector3.SmoothDamp(_cam.transform.position, new Vector3(transform.position.x+xMidpoint,transform.position.y+yMidpoint,-1f) , ref velocity, smooth);
+        _cam.transform.position = Vector3.SmoothDamp(_cam.transform.position, new Vector3(transform.position.x + xMidpoint, transform.position.y + yMidpoint, -1f), ref velocity, smooth);
 
     }
     IEnumerator Shake()
@@ -143,8 +157,79 @@ public class PlayerScript : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if(inventory.selectedItem != null)
+            if (inventory.selectedItem != null)
                 inventory.selectedItem.Use(this);
+        }
+    }
+
+    void RespawnParse()
+    {
+        Collider2D[] circleCols = Physics2D.OverlapCircleAll(this.transform.position, spawnerRadius, spawnerMask);
+		for (int i = 0; i < circleCols.Length; i++)
+		{
+            Collider2D circleCol = circleCols[i];
+			if (circleCol == spawner || circleCol == null)
+			{
+                continue; 
+			}
+
+            spawner = circleCol.gameObject;
+            break;
+		}
+    }
+
+    //Down the line change this an IEnumator where it waits for the Taste/Death Animation to finish before Respawning
+    void Respawn()
+    {
+        if(health <= 0)
+        {
+            this.transform.position = spawner.transform.position;
+            health = 100;
+        }
+    }
+
+   public void UpdateHealth(float newHealthValue)
+   {
+        health = newHealthValue;
+   }
+   public void ReceiveDamage(float damage)
+   {
+        var updatedHealth = health - damage;
+        UpdateHealth(updatedHealth > 0 ? updatedHealth : 0);
+   }
+
+   void ApplyKnockBack(Vector2 direction, float force)
+    {
+        rb.AddForce(direction * force, ForceMode2D.Impulse);
+    }
+
+    private GameObject InstantiateDroplet(Vector2 position)
+    {
+        if (droplet != null)
+        {
+            Destroy(droplet);
+        }
+        droplet = new GameObject("Droplet");
+        droplet.transform.position = position;
+        CircleCollider2D cirCollider = droplet.AddComponent<CircleCollider2D>(); // Add a collider to the point
+        cirCollider.isTrigger = true; // Set collider as trigger
+        droplet.tag = "Droplet";
+        return droplet;
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(this.transform.position, spawnerRadius);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy")) 
+        {
+            ReceiveDamage(5f);
+            /*Vector2 directionToPlayer = ((Vector2).transform.position - rb.position).normalized;
+            rb.AddForce(-directionToPlayer * 30f,ForceMode2D.Impulse);*/
+            
         }
     }
 }
