@@ -10,10 +10,6 @@ public class WanderState : State
     [SerializeField] private GameObject enemy;
     [SerializeField] private Transform enemyTransform;
     public bool showGizmos;
-    /*
-    [SerializeField] private AILerp aiLerp;
-    [SerializeField] private float wanderSpeed;
-    */
     #endregion
 
     #region States to transition to
@@ -63,13 +59,6 @@ public class WanderState : State
         aiLerp = enemy.GetComponent<AILerp>();
         aiDestinationSetter.target = pointToGoTowards().transform;
     }
-
-    /*
-    void Update()
-    {
-        aiLerp.speed = wanderSpeed;
-    }
-    */
 
     public override State RunCurrentState()
     {

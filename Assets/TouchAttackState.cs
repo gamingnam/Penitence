@@ -41,7 +41,6 @@ public class TouchAttackState : State
         player = GameObject.FindGameObjectWithTag("Player");
         playerTransform = player.transform;
         ps = player.GetComponent<PlayerScript>();
-        //rb.AddForce(Vector2.zero, ForceMode2D.Impulse);
     }
 public override State RunCurrentState()
     {
@@ -70,7 +69,6 @@ public override State RunCurrentState()
     {
 
         Lunge();
-        //rb.AddForce(Vector2.zero,ForceMode2D.Impulse);
         yield return new WaitForSeconds(coolDownSeconds);
         hasTouchAttacked = true;
     }
@@ -79,7 +77,6 @@ public override State RunCurrentState()
     private void Lunge() 
     {
         Vector2 directionToPlayer = ((Vector2)ps.droplet.transform.position - rb.position).normalized;
-        //rb.AddForce(directionToPlayer * lungeStrength, ForceMode2D.Impulse);
         rb.velocity = directionToPlayer * aiLerp.speed;
         Debug.Log("I AM EDGING!");
     }
