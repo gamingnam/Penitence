@@ -121,9 +121,13 @@ MonoBehaviour:
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   controlID: 89
 =======
   controlID: 27
+>>>>>>> Stashed changes
+=======
+  controlID: 114
 >>>>>>> Stashed changes
 --- !u!114 &6
 MonoBehaviour:
@@ -170,11 +174,16 @@ MonoBehaviour:
 <<<<<<< Updated upstream
     width: 835
     height: 482
+<<<<<<< Updated upstream
   m_MinSize: {x: 200, y: 200}
   m_MaxSize: {x: 4000, y: 4000}
 =======
     width: 626
     height: 381
+  m_MinSize: {x: 201, y: 221}
+  m_MaxSize: {x: 4001, y: 4021}
+>>>>>>> Stashed changes
+=======
   m_MinSize: {x: 201, y: 221}
   m_MaxSize: {x: 4001, y: 4021}
 >>>>>>> Stashed changes
@@ -203,12 +212,17 @@ MonoBehaviour:
     y: 482
     width: 835
     height: 457
+<<<<<<< Updated upstream
   m_MinSize: {x: 200, y: 200}
   m_MaxSize: {x: 4000, y: 4000}
 =======
     y: 381
     width: 626
     height: 361
+  m_MinSize: {x: 201, y: 221}
+  m_MaxSize: {x: 4001, y: 4021}
+>>>>>>> Stashed changes
+=======
   m_MinSize: {x: 201, y: 221}
   m_MaxSize: {x: 4001, y: 4021}
 >>>>>>> Stashed changes
@@ -242,9 +256,13 @@ MonoBehaviour:
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   controlID: 90
 =======
   controlID: 89
+>>>>>>> Stashed changes
+=======
+  controlID: 51
 >>>>>>> Stashed changes
 --- !u!114 &10
 MonoBehaviour:
@@ -282,7 +300,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 12006, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: ConsoleWindow
+  m_Name: ProjectBrowser
   m_EditorClassIdentifier: 
   m_Children: []
   m_Position:
@@ -292,6 +310,7 @@ MonoBehaviour:
     y: 479
     width: 610
     height: 460
+<<<<<<< Updated upstream
   m_MinSize: {x: 100, y: 100}
   m_MaxSize: {x: 4000, y: 4000}
 =======
@@ -302,11 +321,16 @@ MonoBehaviour:
   m_MaxSize: {x: 4002, y: 4021}
 >>>>>>> Stashed changes
   m_ActualView: {fileID: 17}
+=======
+  m_MinSize: {x: 232, y: 271}
+  m_MaxSize: {x: 10002, y: 10021}
+  m_ActualView: {fileID: 16}
+>>>>>>> Stashed changes
   m_Panes:
   - {fileID: 16}
   - {fileID: 17}
-  m_Selected: 1
-  m_LastSelected: 0
+  m_Selected: 0
+  m_LastSelected: 1
 --- !u!114 &12
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -324,8 +348,13 @@ MonoBehaviour:
     serializedVersion: 2
     x: 1083.5
     y: 0
+<<<<<<< Updated upstream
     width: 356.5
     height: 742
+=======
+    width: 475
+    height: 939
+>>>>>>> Stashed changes
   m_MinSize: {x: 276, y: 71}
   m_MaxSize: {x: 4001, y: 4021}
   m_ActualView: {fileID: 18}
@@ -830,11 +859,15 @@ MonoBehaviour:
 <<<<<<< Updated upstream
     m_Target: {x: -15.350086, y: -5.4217763, z: -0.061260432}
     speed: 2
+<<<<<<< Updated upstream
     m_Value: {x: -15.545837, y: -5.511182, z: -0.06535435}
 =======
     m_Target: {x: -2.2203276, y: 0.891212, z: -0.21553478}
     speed: 2
     m_Value: {x: -2.2203276, y: 0.891212, z: -0.21553478}
+>>>>>>> Stashed changes
+=======
+    m_Value: {x: -15.350086, y: -5.4217763, z: -0.061260432}
 >>>>>>> Stashed changes
   m_RenderMode: 0
   m_CameraMode:
@@ -888,11 +921,15 @@ MonoBehaviour:
 <<<<<<< Updated upstream
     m_Target: 8.6880045
     speed: 2
+<<<<<<< Updated upstream
     m_Value: 9.097387
 =======
     m_Target: 18.830944
     speed: 2
     m_Value: 18.830944
+>>>>>>> Stashed changes
+=======
+    m_Value: 8.6880045
 >>>>>>> Stashed changes
   m_Ortho:
     m_Target: 1
@@ -956,6 +993,7 @@ MonoBehaviour:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       m_SelectedIDs: 
       m_LastClickedID: 0
       m_ExpandedIDs: a2f9ffffdaf9ffffa8710000
@@ -964,20 +1002,25 @@ MonoBehaviour:
       m_LastClickedID: 29266
       m_ExpandedIDs: c4f8ffffdef8ffff52720000
 >>>>>>> Stashed changes
+=======
+      m_SelectedIDs: 80760000
+      m_LastClickedID: 30336
+      m_ExpandedIDs: 3cf1fffffaf4ffffdaf9ffff
+>>>>>>> Stashed changes
       m_RenameOverlay:
         m_UserAcceptedRename: 0
-        m_Name: Player
-        m_OriginalName: Player
+        m_Name: 
+        m_OriginalName: 
         m_EditFieldRect:
           serializedVersion: 2
           x: 0
           y: 0
           width: 0
           height: 0
-        m_UserData: 29004
+        m_UserData: 0
         m_IsWaitingForDelay: 0
         m_IsRenaming: 0
-        m_OriginalEventType: 0
+        m_OriginalEventType: 11
         m_IsRenamingFilename: 0
         m_ClientGUIView: {fileID: 10}
       m_SearchString: 
@@ -1032,7 +1075,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Scripts
+    - Assets/Scenes
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -1040,19 +1083,25 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Scripts
+  - Assets/Scenes
   m_LastFoldersGridSize: -1
   m_LastProjectPath: C:\Users\nycsu\Desktop\Game Development\Unity\Unity Projects\penitence
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 81}
+<<<<<<< Updated upstream
     m_SelectedIDs: 7e730000
     m_LastClickedID: 29566
 <<<<<<< Updated upstream
     m_ExpandedIDs: 00000000c6720000c8720000ca720000cc720000
 =======
     m_ExpandedIDs: 0000000010730000
+>>>>>>> Stashed changes
+=======
+    m_SelectedIDs: 9a740000
+    m_LastClickedID: 29850
+    m_ExpandedIDs: 00000000c8720000ca720000cc720000ce72000000ca9a3b
 >>>>>>> Stashed changes
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -1082,9 +1131,13 @@ MonoBehaviour:
     m_SelectedIDs: 
     m_LastClickedID: 0
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     m_ExpandedIDs: 00000000c6720000c8720000ca720000cc720000
 =======
     m_ExpandedIDs: 0000000010730000
+>>>>>>> Stashed changes
+=======
+    m_ExpandedIDs: 00000000c8720000ca720000cc720000ce720000
 >>>>>>> Stashed changes
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -1110,9 +1163,9 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: 58f2ffff
-    m_LastClickedInstanceID: -3496
-    m_HadKeyboardFocusLastEvent: 0
+    m_SelectedInstanceIDs: 
+    m_LastClickedInstanceID: 0
+    m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: 8c750000a8730000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
