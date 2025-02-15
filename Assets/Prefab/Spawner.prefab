@@ -16,7 +16,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &8029750540212240149
 Transform:
   m_ObjectHideFlags: 0
@@ -45,9 +45,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemies:
-  - {fileID: 0}
+  - {fileID: 2737112834036079629, guid: d7c52281c63b5c24fb386b968af48271, type: 3}
   enemySpawnCoolDown: 0
   enemySpawnCoolTime: 3
   enemyCount: 0
-  maxEnemies: 10
+  maxEnemies: 3
   isSpawningEnemy: 0

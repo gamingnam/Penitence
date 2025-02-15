@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEditor;
+using TMPro;
 using UnityEngine;
 
 public class PlayerScript : MonoBehaviour,IDamageable
@@ -46,18 +47,20 @@ public class PlayerScript : MonoBehaviour,IDamageable
     [SerializeField] private GameObject spawner;
     [SerializeField] private LayerMask spawnerMask;
     [SerializeField] private int spawnerRadius;
-    [SerializeField] public GameObject droplet;
-    
+    public GameObject droplet;
+    public TextMeshProUGUI healthText; 
+
     public UnityEngine.Rendering.Universal.Light2D muzzleflash;
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        ammo = 7;
+        //ammo = 7;
         _cam = Camera.main;
         InstantiateDroplet(this.transform.position);
         muzzleflash = muzzle.GetComponent<UnityEngine.Rendering.Universal.Light2D>();
+        healthText.text = "";
         health = 100f;
 
     }
@@ -81,6 +84,7 @@ public class PlayerScript : MonoBehaviour,IDamageable
         RespawnParse();
         Respawn();
         InstantiateDroplet(this.transform.position);
+        healthText.text = "Health: " + health;
     }
     private void LateUpdate()
     {
