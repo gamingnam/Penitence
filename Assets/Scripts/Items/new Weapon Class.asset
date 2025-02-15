@@ -9,13 +9,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8942facc79848254dbcced688df99ce5, type: 3}
-  m_Name: Bryan Weapon
+  m_Script: {fileID: 11500000, guid: 8d745c39048978f4cb06b649ef952541, type: 3}
+  m_Name: new Weapon Class
   m_EditorClassIdentifier: 
-  itemName: Bat
-  itemIcon: {fileID: 21300000, guid: d8888057cd9cf764d90b7ec1d726695e, type: 3}
+  itemName: 
+  itemIcon: {fileID: 0}
   description: 
-  isStackable: 0
+  isStackable: 1
   isDroppable: 0
   itemObject: {fileID: 0}
   equipSpeed: 0
+  weaponType: 0
+  weaponDamage: 0
+  ammoCapacity: 0
+  _fireRate: 0
+  firingError: 0
+  damageFalloffRange: 0
+  damageFalloff: 0
+  reloadSpeed: 0
+  attackSound: {fileID: 0}
+  reloadSound: {fileID: 0}

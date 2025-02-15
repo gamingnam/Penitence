@@ -319,7 +319,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bffa560f8528c264f98e21d2b3505900, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ammo: 10
+  ammo: 1000
   health: 100
   inventory: {fileID: 0}
   speed: 300
@@ -585,7 +585,7 @@ MonoBehaviour:
   - {x: 0.47844204, y: -0.22929345, z: 0}
   m_ShapePathHash: -1973668868
   m_Mesh: {fileID: 0}
-  m_InstanceId: -3540
+  m_InstanceId: -32892
   m_LocalBounds:
     m_Center: {x: -0.069806814, y: -0.06000194, z: 0}
     m_Extent: {x: 0.567334, y: 0.39176702, z: 0}
