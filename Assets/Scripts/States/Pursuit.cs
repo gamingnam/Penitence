@@ -59,8 +59,6 @@ public class Pursuit : State
     {
         aiLerp.speed = pursuitSpeed;
         aiDestinationSetter.target = playerTransform;
-        Debug.Log(Vector2.Distance(enemyTransform.position,playerTransform.position));
-
         if (!fov.canSeePlayer)
         {
             aiDestinationSetter.target = null;

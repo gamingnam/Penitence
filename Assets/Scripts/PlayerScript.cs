@@ -231,8 +231,10 @@ public class PlayerScript : MonoBehaviour,IDamageable
         if (collision.gameObject.CompareTag("Enemy")) 
         {
             ReceiveDamage(5f);
-            /*Vector2 directionToPlayer = ((Vector2).transform.position - rb.position).normalized;
-            rb.AddForce(-directionToPlayer * 30f,ForceMode2D.Impulse);*/
+            Transform enemyTransform = collision.gameObject.GetComponent<Transform>();
+            Vector2 directionToPlayer = ((Vector2)enemyTransform.transform.position - this.rb.position).normalized;
+            Debug.Log(directionToPlayer);
+            rb.AddForce(-directionToPlayer * 30f,ForceMode2D.Impulse);
             
         }
     }
