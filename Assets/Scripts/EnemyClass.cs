@@ -25,7 +25,6 @@ public class Enemy : MonoBehaviour,IDamageable
 
     public void Update()
     {
-        RotateToPlayer(GameObject.FindGameObjectWithTag("Player"));
         if(_currentHealth <= 0)
         {
             Destroy(gameObject);
@@ -41,17 +40,17 @@ public class Enemy : MonoBehaviour,IDamageable
         var updatedHealth = _currentHealth - damage;
         UpdateHealth(updatedHealth > 0 ? updatedHealth : 0);
         Instantiate(bloodSpray, transform.position, Quaternion.identity);
-        DropBlood(5, 1f);
+        //DropBlood(5, 1f);
         AudioSource.PlayClipAtPoint(hurtSound, transform.position, 1f);
 
     }
-    public void DropBlood(int amount, float spread)
+   /* public void DropBlood(int amount, float spread)
     {
         for (int i = 0; i < amount; i++)
         {
             Instantiate(bloodDrop, (Vector2)(transform.position + Random.insideUnitSphere * spread), Quaternion.identity);
         }
-    }
+    }*/
     public void RotateToPlayer(GameObject player)
     {
         Vector3 direction = player.transform.position - transform.position;

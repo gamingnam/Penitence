@@ -18,7 +18,8 @@ public class ItemClass : ScriptableObject
         Debug.Log("used item");
     }
     public virtual ItemClass GetItem() { return this; }
-    public virtual WeapClass GetWeap() { return null; }
+    public virtual MeleeClass GetMelee() { return null; }
+    public virtual RangedClass GetRanged() { return null; }
     public virtual MiscClass GetMisc() { return null; }
     public virtual ConsumableClass GetConsumable() {  return null; }
 

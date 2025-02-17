@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8942facc79848254dbcced688df99ce5, type: 3}
   m_Name: Bryan Weapon
   m_EditorClassIdentifier: 
-  itemName: Bryan
+  itemName: Bat
   itemIcon: {fileID: 21300000, guid: d8888057cd9cf764d90b7ec1d726695e, type: 3}
+  description: 
   isStackable: 0
+  isDroppable: 0
+  itemObject: {fileID: 0}
+  equipSpeed: 0

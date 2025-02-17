@@ -6,7 +6,7 @@ public class pickup : MonoBehaviour
 {
     [SerializeField] private GameObject inventory;
     private InventoryManager inventoryManager;
-    [SerializeField] private WeapClass weapon;
+    [SerializeField] private MeleeClass weapon;
     [SerializeField] private AudioClip pickupSound;
     void Start()
     {
