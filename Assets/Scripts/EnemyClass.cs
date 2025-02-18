@@ -24,9 +24,9 @@ public class Enemy : MonoBehaviour,IDamageable
     public void Start()
     {
         _currentHealth = MaxHp;
-        bloodDropPool = new ObjectPooler<GameObject>(bloodDrop,5,null);
-        hurtSoundPool = new ObjectPooler<GameObject>(_audioSource.gameObject,10,null);
-        bloodSprayPool = new ObjectPooler<GameObject>(bloodSpray,15,null);
+        bloodDropPool = new ObjectPooler<GameObject>(bloodDrop,21,null);
+        hurtSoundPool = new ObjectPooler<GameObject>(_audioSource.gameObject,5,null);
+        bloodSprayPool = new ObjectPooler<GameObject>(bloodSpray,20,null);
 
     }
 
