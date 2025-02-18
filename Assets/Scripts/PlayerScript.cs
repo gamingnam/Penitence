@@ -9,48 +9,69 @@ using UnityEngine;
 
 public class PlayerScript : MonoBehaviour,IDamageable
 {
+    #region General
+    [Header("General")]
     public int ammo;
     public float health;
-
-    [SerializeField] public InventoryManager inventory;
-
     [SerializeField] private float speed;
+    private Rigidbody2D rb;
+    #endregion
+   
+    #region Movement 
+    [Header("Movement")]
     private float hor;
     private float vert;
     private Vector2 dir;
-    private Rigidbody2D rb;
-
+    private Vector3 velocity = Vector3.zero;
+    #endregion
+   
+    #region Camera
+    [Header("Camera")]
+    private Camera _cam;
     private Vector3 mouseWorldPosition;
     private float lookAngle;
-
-    [SerializeField] private Transform firePoint;
-
-    private Camera _cam;
     public float smooth = 0.5f;
-    private Vector3 velocity = Vector3.zero;
-
     public AnimationCurve curve;
     public float duration = 1f;
+    #endregion
 
+    #region Attacking
+    [Header("Attacking")]
+    [SerializeField] private Transform firePoint;
+    public Transform muzzle;
+    #endregion
+
+
+    #region Audio and SFX
+    [Header("Audio and SFX")]
     [SerializeField] private AudioClip gunShot;
     [SerializeField] private AudioClip gunNoAmmo;
-    [SerializeField] private AudioClip gunEquip;
     [SerializeField] private AudioClip bulletCasing;
+    #endregion
 
-    [SerializeField] private Sprite normalJohn;
-    [SerializeField] private Sprite hasGun;
-
-    private SpriteRenderer sr;
-
-    public Transform muzzle;
-
+    #region Respawning
+    [Header("Respawning")]
     [SerializeField] private GameObject spawner;
     [SerializeField] private LayerMask spawnerMask;
     [SerializeField] private int spawnerRadius;
     public GameObject droplet;
-    public TextMeshProUGUI healthText; 
+    #endregion
 
+    #region UI
+    [Header("UI")]
+    public TextMeshProUGUI healthText; 
+    [SerializeField] public InventoryManager inventory;
+    #endregion
+
+    #region Light2D
     public UnityEngine.Rendering.Universal.Light2D muzzleflash;
+    #endregion
+
+     //[SerializeField] private Sprite normalJohn;
+    //[SerializeField] private Sprite hasGun;
+
+    //private SpriteRenderer sr;
+
 
     // Start is called before the first frame update
     void Start()

@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class WanderState : State
 {
+    //TODO: Have each enemy have their own unique points so that we can have multiple enemies moving at once
     #region General
     [Header("General")]
     [SerializeField] private GameObject enemy;

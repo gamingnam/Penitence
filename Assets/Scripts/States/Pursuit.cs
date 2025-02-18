@@ -28,15 +28,6 @@ public class Pursuit : State
     [SerializeField] private State attackState;
     [SerializeField] public float attackRange;
     #endregion
-    // Not needed, but keeping just in case for futrue testing
-    /*
-    #region Ending Pursuit Values
-    [Header("Ending Pursuit Values")]
-    [SerializeField] private float endPursitTimer;
-    [SerializeField] private float endPursitTimerThreshold;
-    [SerializeField] private int pursitDistance;
-    #endregion
-    */
 
     private void Start()
     {
@@ -48,12 +39,6 @@ public class Pursuit : State
         enemyTransform = enemy.transform;
     }
 
-    /*
-    void Update()
-    {
-        aiLerp.speed = pursuitSpeed;
-    }
-    */
 
     public override State RunCurrentState()
     {
