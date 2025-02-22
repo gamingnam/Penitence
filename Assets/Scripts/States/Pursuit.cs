@@ -36,7 +36,7 @@ public class Pursuit : State
         aiDestinationSetter = enemy.GetComponent<AIDestinationSetter>();
         aiLerp = enemy.GetComponent<AILerp>();
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
-        enemyTransform = enemy.transform;
+        enemyTransform = enemy.GetComponent<Transform>();
     }
 
 
@@ -53,13 +53,6 @@ public class Pursuit : State
         {
             return attackState;
         }
-
         return this;
-    }
-
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.green;
-        Debug.DrawLine(enemyTransform.position,playerTransform.position);
     }
 }

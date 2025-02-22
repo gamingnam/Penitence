@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 public class Enemy : MonoBehaviour,IDamageable
 {
-    //
+    //TODO: Make scriptable objects for enemyDamage,MaxHp, and potentially speed?
     public int MaxHp;
 
     public int EnemyDmg;

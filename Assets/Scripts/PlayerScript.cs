@@ -47,6 +47,11 @@ public class PlayerScript : MonoBehaviour,IDamageable
     [SerializeField] private AudioClip gunShot;
     [SerializeField] private AudioClip gunNoAmmo;
     [SerializeField] private AudioClip bulletCasing;
+    [SerializeField] private AudioSource audioSource;
+    private ObjectPooler<AudioSource> gsPool;
+    private ObjectPooler<AudioSource> gnsPool;
+    private ObjectPooler<AudioSource> bcPool;
+
     #endregion
 
     #region Respawning
@@ -77,15 +82,18 @@ public class PlayerScript : MonoBehaviour,IDamageable
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        //ammo = 7;
         _cam = Camera.main;
         InstantiateDroplet(this.transform.position);
         muzzleflash = muzzle.GetComponent<UnityEngine.Rendering.Universal.Light2D>();
         healthText.text = "";
         health = 100f;
+        gsPool = new ObjectPooler<AudioSource>(audioSource,ammo,null);
+        gnsPool = new ObjectPooler<AudioSource>(audioSource,20,null);
+        bcPool = new ObjectPooler<AudioSource>(audioSource,20,null);
 
     }
 
+    #region Updates
     // Update is called once per frame
     void Update()
     {
@@ -115,7 +123,9 @@ public class PlayerScript : MonoBehaviour,IDamageable
     {
         rb.velocity = dir * speed * Time.deltaTime;
     }
+    #endregion
 
+    #region Shooting
     private void ShootHandler()
     {
         if (Input.GetButtonDown("Fire1") && InventoryManager.isInventoryOpened == false)
@@ -124,7 +134,7 @@ public class PlayerScript : MonoBehaviour,IDamageable
             {
                 StartCoroutine(Shake());
                 muzzleflash.intensity = 50f;
-                AudioSource.PlayClipAtPoint(gunShot, transform.position, 1f);
+                PlayGunShot();
                 RaycastHit2D hit = Physics2D.Raycast(firePoint.position, (Vector2)mouseWorldPosition - (Vector2)firePoint.position);
                 if (hit)
                 {
@@ -146,12 +156,53 @@ public class PlayerScript : MonoBehaviour,IDamageable
         muzzleflash.intensity = Mathf.Clamp(muzzleflash.intensity, 0f, 50f);
     }
 
+    private void PlayGunShot()
+    {
+        AudioSource audioSource = gsPool.Get(transform.position,Quaternion.identity);
+        audioSource.clip = gunShot; // Ensure the correct sound is assigned
+        audioSource.Play();
+        
+        StartCoroutine(ReturnToGunShotPool(audioSource, audioSource.clip.length)); // Return after sound finishes
+    }
+
+    private void PlayNoAmmo()
+    {
+        AudioSource audioSource = gnsPool.Get(transform.position,Quaternion.identity);
+        audioSource.clip = gunNoAmmo; // Ensure the correct sound is assigned
+        audioSource.Play();
+        
+        StartCoroutine(ReturnToGunNoAmmoPool(audioSource, audioSource.clip.length)); // Return after sound finishes
+    }
+
     public IEnumerator bulletShellSound()
     {
         yield return new WaitForSeconds(0.25f);
-        AudioSource.PlayClipAtPoint(bulletCasing, transform.position, 1f);
+        AudioSource audioSource  = bcPool.Get(transform.position,Quaternion.identity);
+        audioSource.clip = bulletCasing;
+        audioSource.Play();
+        StartCoroutine(ReturnToGunShotPool(audioSource, audioSource.clip.length));
+
+    }
+    IEnumerator ReturnToGunShotPool(AudioSource source, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        gsPool.ReturnToPool(source);
     }
 
+    IEnumerator ReturnToGunNoAmmoPool(AudioSource source, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        gnsPool.ReturnToPool(source);
+    }
+    IEnumerator ReturnToBulletCasePool(AudioSource source, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        bcPool.ReturnToPool(source);
+    }
+    #endregion
+
+
+    #region Camera
     private void CameraHandler()
     {
         float magnitude = 2f;
@@ -177,8 +228,10 @@ public class PlayerScript : MonoBehaviour,IDamageable
 
         _cam.transform.position = new Vector3(startPosition.x, startPosition.y, _cam.transform.position.z);
     }
+	#endregion
 
-    private void InventoryHandler()
+	#region Inventory
+	private void InventoryHandler()
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
@@ -186,8 +239,10 @@ public class PlayerScript : MonoBehaviour,IDamageable
                 inventory.selectedItem.Use(this);
         }
     }
+	#endregion
 
-    void RespawnParse()
+	#region Respawn
+	void RespawnParse()
     {
         Collider2D[] circleCols = Physics2D.OverlapCircleAll(this.transform.position, spawnerRadius, spawnerMask);
 		for (int i = 0; i < circleCols.Length; i++)
@@ -202,7 +257,6 @@ public class PlayerScript : MonoBehaviour,IDamageable
             break;
 		}
     }
-
     //Down the line change this an IEnumator where it waits for the Taste/Death Animation to finish before Respawning
     void Respawn()
     {
@@ -212,7 +266,9 @@ public class PlayerScript : MonoBehaviour,IDamageable
             health = 100;
         }
     }
+    #endregion
 
+   #region Health
    public void UpdateHealth(float newHealthValue)
    {
         health = newHealthValue;
@@ -222,11 +278,7 @@ public class PlayerScript : MonoBehaviour,IDamageable
         var updatedHealth = health - damage;
         UpdateHealth(updatedHealth > 0 ? updatedHealth : 0);
    }
-
-   void ApplyKnockBack(Vector2 direction, float force)
-    {
-        rb.AddForce(direction * force, ForceMode2D.Impulse);
-    }
+   #endregion;
 
     private GameObject InstantiateDroplet(Vector2 position)
     {
@@ -242,21 +294,30 @@ public class PlayerScript : MonoBehaviour,IDamageable
         return droplet;
     }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawWireSphere(this.transform.position, spawnerRadius);
-    }
-
+   #region Collision
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Enemy")) 
         {
-            ReceiveDamage(5f);
+            Enemy enemy = collision.gameObject.GetComponent<Enemy>();
             Transform enemyTransform = collision.gameObject.GetComponent<Transform>();
-            Vector2 directionToPlayer = ((Vector2)enemyTransform.transform.position - this.rb.position).normalized;
-            Debug.Log(directionToPlayer);
-            rb.AddForce(-directionToPlayer * 30f,ForceMode2D.Impulse);
+            ReceiveDamage(enemy.EnemyDmg);
+            Vector2 direction = (rb.position - (Vector2)enemyTransform.position).normalized;
+            Debug.Log(direction);
+            ApplyKnockBack(direction, 9000f);
             
         }
+    }
+
+    private void ApplyKnockBack(Vector2 direction, float strength)
+    {
+        Debug.Log("Applying Knockback");
+        rb.AddForce(direction * strength,ForceMode2D.Impulse);
+    }
+    #endregion
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(this.transform.position, spawnerRadius);
     }
 }

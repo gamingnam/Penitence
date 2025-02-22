@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class TouchAttackState : State
 {
-    //TODO: Attack is happening too fast 
     #region General
     [Header("General")]
     [SerializeField] private Rigidbody2D rb;
@@ -77,8 +76,7 @@ public override State RunCurrentState()
     private void Lunge() 
     {
         Vector2 directionToPlayer = ((Vector2)ps.droplet.transform.position - rb.position).normalized;
-        rb.velocity = directionToPlayer * aiLerp.speed;
-        Debug.Log("I AM EDGING!");
+        rb.velocity = directionToPlayer * aiLerp.speed;;
     }
 
 }

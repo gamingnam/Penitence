@@ -5,12 +5,11 @@ using UnityEngine;
 
 public class WanderState : State
 {
-    //TODO: Have each enemy have their own unique points so that we can have multiple enemies moving at once
+    //TODO: Have it so it can detect the player if it attacked
     #region General
     [Header("General")]
     [SerializeField] private GameObject enemy;
     [SerializeField] private Transform enemyTransform;
-    public bool showGizmos;
     #endregion
 
     #region States to transition to
@@ -29,7 +28,6 @@ public class WanderState : State
 
     #region Tracking the Player
     [Header("Traversing towards the point")]
-    [SerializeField] private GameObject point;
     private readonly int maxRetries;
     [SerializeField][Range(1f, 40f)] private float minDistanceBetweenPoints;
     [SerializeField][Range(0.5f, 2.0f)] private float randomDistanceFactor = 1.0f;
@@ -50,34 +48,40 @@ public class WanderState : State
 
     private void Start()
     {
-        enemy = GameObject.FindGameObjectWithTag("Enemy");
-        //aiLerp = enemy.GetComponent<AILerp>();
         fov = enemy.GetComponent<FOV>();
         enemyTransform = enemy.transform;
         grid = AstarPath.active.data.gridGraph;
         aiDestinationSetter = enemy.GetComponent<AIDestinationSetter>();
         aiPath = enemy.GetComponent<AIPath>();
         aiLerp = enemy.GetComponent<AILerp>();
-        aiDestinationSetter.target = pointToGoTowards().transform;
+        GameObject newPoint = pointToGoTowards();
+        aiDestinationSetter.target = newPoint.transform;
     }
 
     public override State RunCurrentState()
     {
         aiLerp.speed = wanderSpeed;
+
         if (!aiPath.pathPending && aiPath.reachedDestination)
         {
-            aiDestinationSetter.target = pointToGoTowards().transform;
+            GameObject newPoint = pointToGoTowards();
+            aiDestinationSetter.target = newPoint.transform;
+
+            aiPath.canMove = true;
+            aiPath.SearchPath();
         }
-        // Check if the AI is stuck (not moving for too long)
+
         if (IsAIStuck())
         {
-            Debug.Log("AI is stuck, teleporting to a random location!");
-            TeleportToRandomLocation(); // Teleport AI to a random position
+            Debug.Log($"Enemy {enemy.GetInstanceID()} is stuck, teleporting to a random location!");
+            TeleportToRandomLocation();
         }
+
         if (fov.canSeePlayer)
         {
             return pursuitState;
         }
+
         return this;
     }
 
@@ -88,19 +92,16 @@ public class WanderState : State
     private GameObject pointToGoTowards()
     {
         // Create a new point with a trigger collider
-        if (point != null) { Destroy(point); } // Destroy the old point if it exists
+        GameObject newPoint = new GameObject("Point_" + enemy.GetInstanceID());
+        newPoint.transform.position = PickRandomPoint();
+        CircleCollider2D cirCollider = newPoint.AddComponent<CircleCollider2D>();
+        cirCollider.isTrigger = true;
 
-        Vector3 randomPoint = PickRandomPoint(); // Get a valid point
-        point = new GameObject("Point");
-        point.transform.position = randomPoint;
-        CircleCollider2D cirCollider = point.AddComponent<CircleCollider2D>(); // Add a collider to the point
-        cirCollider.isTrigger = true; // Set collider as trigger
-        //aiPath.destination = randomPoint; // Set the new destination for the AI
+        Debug.Log($"Enemy {enemy.GetInstanceID()} destination set to: {newPoint.transform.position}");
+        newPoint.tag = "Destination";
 
-        Debug.Log($"AI destination set to: {randomPoint}");
-        point.tag = "Destination";
-
-        return point; // Return the new GameObject (destination point)
+        return newPoint;
+    
     }
 
     /// <summary>
@@ -154,7 +155,7 @@ public class WanderState : State
     private bool IsAIStuck()
     {
         // Calculate how much time has passed since the last movement
-        if (Vector3.Distance(aiPath.transform.position, lastKnownPosition) < 0.1f)
+        if (Vector3.Distance(aiPath.transform.position, lastKnownPosition) < 0.001f)
         {
             timeSinceLastMovement += Time.deltaTime; // Increase the timer if AI has not moved
         }
@@ -178,4 +179,6 @@ public class WanderState : State
         aiPath.destination = randomPoint; // Set the destination to the new random point
         timeSinceLastMovement = 0f; // Reset the stuck timer
     }
+
+    
 }

@@ -725,7 +725,7 @@ MonoBehaviour:
   maxAcceleration: -2.5
   rotationSpeed: 360
   slowdownDistance: 0.6
-  pickNextWaypointDist: 0.5
+  pickNextWaypointDist: 1
   endReachedDistance: 1
   alwaysDrawGizmos: 1
   slowWhenNotFacingTarget: 1
@@ -934,7 +934,7 @@ MonoBehaviour:
   playerTransform: {fileID: 5926030778956253333}
   fov: {fileID: 0}
   aiLerp: {fileID: 0}
-  pursuitSpeed: 2
+  pursuitSpeed: 3
   aiDestinationSetter: {fileID: 0}
   wanderState: {fileID: 1636837618307462755}
   attackState: {fileID: 8325720227443338098}
