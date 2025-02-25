@@ -5,96 +5,113 @@ using UnityEngine;
 
 public class FOV : MonoBehaviour
 {
-    //TODO: Add Knockback to player
-    //TODO: Add Spawner 
+	[SerializeField] private float fov = 90f; // Field of view in degrees
+	public float distance = 5f; // Max raycast distance
+	[SerializeField] private int rayCount = 10; // Number of FOV rays
+	[SerializeField] private int smallerRaysCount = 12; // Rays around the enemy
+	[SerializeField] private float smallerRayDistance = 2f; // Distance for smaller rays
+	[SerializeField] private AIPath aiPath;
 
-    [SerializeField] private float fov = 90f; // Field of view in degrees
-    public float distance = 5f; // Max raycast distance
-    [SerializeField] private int rayCount = 10; // Number of FOV rays
-    [SerializeField] private int smallerRaysCount = 12; // Rays around the enemy
-    [SerializeField] private float smallerRayDistance = 2f; // Distance for smaller rays
-    [SerializeField] private AIPath aiPath;
+	private Rigidbody2D rb;
+	[SerializeField] private GameObject player;
+	[SerializeField] private LayerMask layerMask;
+	public bool canSeePlayer = false;
+	private AILerp aiLerp;
 
-    private Rigidbody2D rb;
-    [SerializeField] private GameObject player;
-    [SerializeField] private LayerMask layerMask;
-    public bool canSeePlayer = false;
-    private AILerp aiLerp;
+	// Buffer array for RaycastNonAlloc results
+	private RaycastHit2D[] hitsBuffer = new RaycastHit2D[10];
+	void Start()
+	{
+		aiLerp = gameObject.GetComponent<AILerp>();
+		rb = GetComponent<Rigidbody2D>(); // Get the Rigidbody2D
+		player = GameObject.FindGameObjectWithTag("Player");
+		aiPath = GetComponent<AIPath>();
+	}
 
-    void Start()
-    {
-        aiLerp = gameObject.GetComponent<AILerp>();
-        rb = GetComponent<Rigidbody2D>(); // Get the Rigidbody2D
-        player = GameObject.FindGameObjectWithTag("Player");
-        aiPath = GetComponent<AIPath>();
-    }
+	void Update()
+	{
+		if (rb == null || player == null || aiPath == null) return;
 
-    void Update()
-    {
-        if (rb == null || player == null) return;
+		// Get facing angle of AI
+		float facingAngle = GetFacingAngle();
 
-        float facingAngle;
-        if (aiPath != null)
-        {
-            // Get direction towards the AI's steering target (next path point)
-            Vector2 nextWaypointDirection = ((Vector2)aiPath.steeringTarget - (Vector2)transform.position).normalized;
+		// Cast FOV rays
+		if (CheckFOV(facingAngle)) return;
 
-            // Convert direction to angle
-            facingAngle = Mathf.Atan2(nextWaypointDirection.y, nextWaypointDirection.x) * Mathf.Rad2Deg;
-        }
-        else
-        {
-            // Default to current rotation if AIPath is missing
-            facingAngle = transform.eulerAngles.z;
-        }
+		// Cast smaller rays around the enemy
+		CheckSmallerRays();
+	}
 
-        // Calculate the starting angle for the FOV
-        float angleStep = fov / (rayCount - 1);
-        float startAngle = facingAngle - (fov / 2);
-        
-        canSeePlayer = false;
+	private float GetFacingAngle()
+	{
+		// Get direction towards the AI's steering target (next path point)
+		Vector2 nextWaypointDirection = ((Vector2)aiPath.steeringTarget - (Vector2)transform.position).normalized;
 
-        // Cast the FOV rays
-        for (int i = 0; i < rayCount; i++)
-        {
-            float angle = startAngle + (i * angleStep);
-            Vector2 direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
-            RaycastHit2D hit = Physics2D.Raycast(rb.position, direction, distance, layerMask);
+		// Convert direction to angle
+		return Mathf.Atan2(nextWaypointDirection.y, nextWaypointDirection.x) * Mathf.Rad2Deg;
+	}
 
-            // Visualize the FOV rays (Red)
-            Debug.DrawRay(rb.position, direction * distance, Color.red);
+	private bool CheckFOV(float facingAngle)
+	{
+		// Calculate the starting angle for the FOV
+		float angleStep = fov / (rayCount - 1);
+		float startAngle = facingAngle - (fov / 2);
 
-            // If the ray hits the player
-            if (hit.collider != null && hit.collider.gameObject == player)
-            {
-                canSeePlayer = true;
-                Debug.Log("Player detected in FOV!");
-                break;
-            }
+		canSeePlayer = false;
 
+		// Cast the FOV rays
+		for (int i = 0; i < rayCount; i++)
+		{
+			float angle = startAngle + (i * angleStep);
+			Vector2 direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
 
-        }
-        
-        // Cast smaller rays around the enemy
-        float angleIncrement = 360f / smallerRaysCount;
+			// Perform the raycast and store results in the hitsBuffer
+			int hitCount = Physics2D.RaycastNonAlloc(rb.position, direction, hitsBuffer, distance, layerMask);
 
-        for (int i = 0; i < smallerRaysCount; i++)
-        {
-            float angle = i * angleIncrement;
-            Vector2 direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
-            RaycastHit2D smallHit = Physics2D.Raycast(transform.position, direction, smallerRayDistance, layerMask);
+			// Visualize the FOV rays (Red)
+			Debug.DrawRay(rb.position, direction * distance, Color.red);
 
-            // Visualize the smaller rays (Blue)
-            Debug.DrawRay(transform.position, direction * smallerRayDistance, Color.blue);
+			// Iterate through all hits
+			for (int j = 0; j < hitCount; j++)
+			{
+				RaycastHit2D hit = hitsBuffer[j];
+				if (hit.collider != null && hit.collider.gameObject == player)
+				{
+					canSeePlayer = true;
+					return true; // Player detected, break out of FOV check
+				}
+			}
+		}
 
-            // If the ray hits the player
-            if (smallHit.collider != null && smallHit.collider.gameObject == player)
-            {
-                canSeePlayer = true;
-                Debug.Log("Player detected near enemy!");
-                break;
-            }
-        }
-    }
+		return false; // No player detected in FOV
+	}
 
+	private void CheckSmallerRays()
+	{
+		// Cast smaller rays around the enemy if player is not already detected
+		float angleIncrement = 360f / smallerRaysCount;
+
+		for (int i = 0; i < smallerRaysCount; i++)
+		{
+			float angle = i * angleIncrement;
+			Vector2 direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+
+			// Perform the raycast and store results in the hitsBuffer
+			int hitCount = Physics2D.RaycastNonAlloc(transform.position, direction, hitsBuffer, smallerRayDistance, layerMask);
+
+			// Visualize the smaller rays (Blue)
+			Debug.DrawRay(transform.position, direction * smallerRayDistance, Color.blue);
+
+			// Iterate through all hits
+			for (int j = 0; j < hitCount; j++)
+			{
+				RaycastHit2D smallHit = hitsBuffer[j];
+				if (smallHit.collider != null && smallHit.collider.gameObject == player)
+				{
+					canSeePlayer = true;
+					return; // Player detected near enemy, break out of smaller ray check
+				}
+			}
+		}
+	}
 }

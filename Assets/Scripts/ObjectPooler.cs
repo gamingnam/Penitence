@@ -49,13 +49,14 @@ public class ObjectPooler<T> where T : class
         return null;
     }
 
-    /// <summary>
-    /// Takes our created object and puts it at the exact 
-    /// </summary>
-    /// <param name="position"></param>
-    /// <param name="rotation"></param>
-    /// <returns></returns>
-    public T Get(Vector3 position = default, Quaternion rotation = default)
+	/// <summary>
+	/// Retrieves an object from the pool, sets its position and rotation, and activates it.
+	/// If the pool is empty, a new object is created and added to the pool before retrieval.
+	/// </summary>
+	/// <param name="position">The position to set for the retrieved object.</param>
+	/// <param name="rotation">The rotation to set for the retrieved object.</param>
+	/// <returns>The object retrieved from the pool.</returns>
+	public T Get(Vector3 position = default, Quaternion rotation = default)
     {
         if (pool.Count == 0)
         {
@@ -80,7 +81,12 @@ public class ObjectPooler<T> where T : class
         return obj;
     }
 
-    public void ReturnToPool(T obj)
+
+	/// <summary>
+	/// Deactivates the given object and returns it to the pool for future reuse.
+	/// </summary>
+	/// <param name="obj">The object to return to the pool.</param>
+	public void ReturnToPool(T obj)
     {
         if (obj is Component component)
         {

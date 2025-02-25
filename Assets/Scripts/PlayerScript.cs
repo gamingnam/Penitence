@@ -9,41 +9,42 @@ using UnityEngine;
 
 public class PlayerScript : MonoBehaviour,IDamageable
 {
-    #region General
+    #region General Variables
     [Header("General")]
     public int ammo;
     public float health;
     [SerializeField] private float speed;
     private Rigidbody2D rb;
-    #endregion
-   
-    #region Movement 
-    [Header("Movement")]
+	#endregion
+
+	#region Movement Variables
+	[Header("Movement")]
     private float hor;
     private float vert;
     private Vector2 dir;
     private Vector3 velocity = Vector3.zero;
-    #endregion
-   
-    #region Camera
-    [Header("Camera")]
+	#endregion
+
+	#region Camera Variables
+	[Header("Camera")]
     private Camera _cam;
     private Vector3 mouseWorldPosition;
     private float lookAngle;
     public float smooth = 0.5f;
     public AnimationCurve curve;
     public float duration = 1f;
-    #endregion
+	#endregion
 
-    #region Attacking
-    [Header("Attacking")]
-    [SerializeField] private Transform firePoint;
+	#region Attacking Variables
+	[Header("Attacking")]
+	[SerializeField]private float enemyDamage;
+	[SerializeField] private Transform firePoint;
     public Transform muzzle;
-    #endregion
+	#endregion
 
 
-    #region Audio and SFX
-    [Header("Audio and SFX")]
+	#region Audio and SFX Variables
+	[Header("Audio and SFX")]
     [SerializeField] private AudioClip gunShot;
     [SerializeField] private AudioClip gunNoAmmo;
     [SerializeField] private AudioClip bulletCasing;
@@ -52,34 +53,35 @@ public class PlayerScript : MonoBehaviour,IDamageable
     private ObjectPooler<AudioSource> gnsPool;
     private ObjectPooler<AudioSource> bcPool;
 
-    #endregion
+	#endregion
 
-    #region Respawning
-    [Header("Respawning")]
+	#region Respawning Variables
+	[Header("Respawning")]
     [SerializeField] private GameObject spawner;
     [SerializeField] private LayerMask spawnerMask;
     [SerializeField] private int spawnerRadius;
     public GameObject droplet;
-    #endregion
+	#endregion
 
-    #region UI
-    [Header("UI")]
+	#region UI Variables
+	[Header("UI")]
     public TextMeshProUGUI healthText; 
     [SerializeField] public InventoryManager inventory;
-    #endregion
+	#endregion
 
-    #region Light2D
-    public UnityEngine.Rendering.Universal.Light2D muzzleflash;
-    #endregion
+	#region Light2D Variables
+	[Header("Light2D")]
+	public UnityEngine.Rendering.Universal.Light2D muzzleflash;
+	#endregion
 
-     //[SerializeField] private Sprite normalJohn;
-    //[SerializeField] private Sprite hasGun;
+	//[SerializeField] private Sprite normalJohn;
+	//[SerializeField] private Sprite hasGun;
 
-    //private SpriteRenderer sr;
+	//private SpriteRenderer sr;
 
 
-    // Start is called before the first frame update
-    void Start()
+	// Start is called before the first frame update
+	void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         _cam = Camera.main;
@@ -89,11 +91,11 @@ public class PlayerScript : MonoBehaviour,IDamageable
         health = 100f;
         gsPool = new ObjectPooler<AudioSource>(audioSource,ammo,null);
         gnsPool = new ObjectPooler<AudioSource>(audioSource,20,null);
-        bcPool = new ObjectPooler<AudioSource>(audioSource,20,null);
+        bcPool = new ObjectPooler<AudioSource>(audioSource,ammo,null);
 
     }
 
-    #region Updates
+    #region Update Methods
     // Update is called once per frame
     void Update()
     {
@@ -125,7 +127,7 @@ public class PlayerScript : MonoBehaviour,IDamageable
     }
     #endregion
 
-    #region Shooting
+    #region Shooting Methods
     private void ShootHandler()
     {
         if (Input.GetButtonDown("Fire1") && InventoryManager.isInventoryOpened == false)
@@ -138,18 +140,18 @@ public class PlayerScript : MonoBehaviour,IDamageable
                 RaycastHit2D hit = Physics2D.Raycast(firePoint.position, (Vector2)mouseWorldPosition - (Vector2)firePoint.position);
                 if (hit)
                 {
-                    Debug.Log(hit.collider.gameObject.name);
                     if (hit.collider.gameObject.tag == "Enemy")
                     {
-                        hit.collider.gameObject.GetComponent<Enemy>().ReceiveDamage(30);
-                    }
+                        hit.collider.gameObject.GetComponent<Enemy>().ReceiveDamage(enemyDamage); //<-- enemyDamage variable can be changed later to be dynamic changeable based off enemy type (maybe with a scriptable object?)
+
+					}
                 }
                 StartCoroutine(bulletShellSound());
                 ammo--;
             }
             else
             {
-                AudioSource.PlayClipAtPoint(gunNoAmmo, transform.position, 1f);
+                PlayNoAmmo();
             }
         }
         muzzleflash.intensity -= 2f;
@@ -167,7 +169,7 @@ public class PlayerScript : MonoBehaviour,IDamageable
 
     private void PlayNoAmmo()
     {
-        AudioSource audioSource = gnsPool.Get(transform.position,Quaternion.identity);
+		AudioSource audioSource = gnsPool.Get(transform.position,Quaternion.identity);
         audioSource.clip = gunNoAmmo; // Ensure the correct sound is assigned
         audioSource.Play();
         
@@ -180,7 +182,7 @@ public class PlayerScript : MonoBehaviour,IDamageable
         AudioSource audioSource  = bcPool.Get(transform.position,Quaternion.identity);
         audioSource.clip = bulletCasing;
         audioSource.Play();
-        StartCoroutine(ReturnToGunShotPool(audioSource, audioSource.clip.length));
+        StartCoroutine(ReturnToBulletCasePool(audioSource, audioSource.clip.length));
 
     }
     IEnumerator ReturnToGunShotPool(AudioSource source, float delay)
@@ -199,11 +201,10 @@ public class PlayerScript : MonoBehaviour,IDamageable
         yield return new WaitForSeconds(delay);
         bcPool.ReturnToPool(source);
     }
-    #endregion
+	#endregion
 
-
-    #region Camera
-    private void CameraHandler()
+	#region Camera Methods
+	private void CameraHandler()
     {
         float magnitude = 2f;
         float xMidpoint = Mathf.Clamp((mouseWorldPosition.x - transform.position.x) / 2, -magnitude, magnitude);
@@ -230,7 +231,7 @@ public class PlayerScript : MonoBehaviour,IDamageable
     }
 	#endregion
 
-	#region Inventory
+	#region Inventory Methods
 	private void InventoryHandler()
     {
         if (Input.GetKeyDown(KeyCode.E))
@@ -241,7 +242,7 @@ public class PlayerScript : MonoBehaviour,IDamageable
     }
 	#endregion
 
-	#region Respawn
+	#region Respawn Methods
 	void RespawnParse()
     {
         Collider2D[] circleCols = Physics2D.OverlapCircleAll(this.transform.position, spawnerRadius, spawnerMask);
@@ -266,10 +267,10 @@ public class PlayerScript : MonoBehaviour,IDamageable
             health = 100;
         }
     }
-    #endregion
+	#endregion
 
-   #region Health
-   public void UpdateHealth(float newHealthValue)
+	#region Health Methods
+	public void UpdateHealth(float newHealthValue)
    {
         health = newHealthValue;
    }
@@ -278,9 +279,10 @@ public class PlayerScript : MonoBehaviour,IDamageable
         var updatedHealth = health - damage;
         UpdateHealth(updatedHealth > 0 ? updatedHealth : 0);
    }
-   #endregion;
+	#endregion;
 
-    private GameObject InstantiateDroplet(Vector2 position)
+	#region Player Tracking Methods
+	private GameObject InstantiateDroplet(Vector2 position)
     {
         if (droplet != null)
         {
@@ -293,26 +295,30 @@ public class PlayerScript : MonoBehaviour,IDamageable
         droplet.tag = "Droplet";
         return droplet;
     }
+	#endregion
 
-   #region Collision
-    private void OnCollisionEnter2D(Collision2D collision)
+	#region Collision Methods
+	private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Enemy")) 
         {
             Enemy enemy = collision.gameObject.GetComponent<Enemy>();
-            Transform enemyTransform = collision.gameObject.GetComponent<Transform>();
-            ReceiveDamage(enemy.EnemyDmg);
+			ReceiveDamage(enemy.EnemyDmg);
+
+			//This code below is technically useless as the enemies rigidbodies are static, and cannot apply a force
+			//Maybe we find someway for the player to do it instead?
+
+			/*Transform enemyTransform = collision.gameObject.GetComponent<Transform>();
             Vector2 direction = (rb.position - (Vector2)enemyTransform.position).normalized;
             Debug.Log(direction);
-            ApplyKnockBack(direction, 9000f);
-            
-        }
-    }
+            ApplyKnockBack(direction, 9000f);*/
 
-    private void ApplyKnockBack(Vector2 direction, float strength)
+		}
+	}
+	private void ApplyKnockBack(Vector2 direction, float strength)
     {
         Debug.Log("Applying Knockback");
-        rb.AddForce(direction * strength,ForceMode2D.Impulse);
+        this.rb.AddForce(direction * strength,ForceMode2D.Impulse);
     }
     #endregion
 

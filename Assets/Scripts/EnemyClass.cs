@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 public class Enemy : MonoBehaviour,IDamageable
 {
-    //TODO: Make scriptable objects for enemyDamage,MaxHp, and potentially speed?
-    public int MaxHp;
+	//TODO: Find a way to pool less objects (maybe make it so the know how may enemies are on the stage, and divde it by their health?)
+	//TODO: Make scriptable objects for enemyDamage,MaxHp, and potentially speed?
+	//TODO: As Nam if the blood is being destoryeed from this enemy class or the Blood Script?
+	//TODO: Go back to using Raycast non alloc for rays in FOV script?
+
+	public int MaxHp;
 
     public int EnemyDmg;
 

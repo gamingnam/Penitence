@@ -47,7 +47,7 @@ MonoBehaviour:
   enemies:
   - {fileID: 2737112834036079629, guid: d7c52281c63b5c24fb386b968af48271, type: 3}
   enemySpawnCoolDown: 0
-  enemySpawnCoolTime: 3
+  enemySpawnCoolTime: 2
   enemyCount: 0
   maxEnemies: 3
   isSpawningEnemy: 0
